@@ -117,6 +117,7 @@ export default class ReactCalendarTimeline extends Component {
     onCanvasMouseEnter: PropTypes.func,
     onCanvasMouseLeave: PropTypes.func,
     onCanvasMouseMove: PropTypes.func,
+    onHeaderClick: PropTypes.func,
 
     moveResizeValidator: PropTypes.func,
 
@@ -237,6 +238,7 @@ export default class ReactCalendarTimeline extends Component {
     onCanvasMouseEnter: null,
     onCanvasMouseLeave: null,
     onCanvasMouseMove: null,
+    onHeaderClick: null,
 
     moveResizeValidator: null,
 
@@ -638,28 +640,32 @@ export default class ReactCalendarTimeline extends Component {
     this.props.onTimeChange(newVisibleTimeStart, newVisibleTimeStart + newZoom, this.updateScrollCanvas)
   }
 
-  showPeriod = (from, unit) => {
-    let visibleTimeStart = from.valueOf()
-    let visibleTimeEnd = moment(from).add(1, unit).valueOf()
-    let zoom = visibleTimeEnd - visibleTimeStart
-    let minZoom = this.props.minZoom;
-
-    // can't zoom in more than to show one hour
-    if (zoom <= minZoom) {
-      return
-    }
-
-    // clicked on the big header and already focused here, zoom out
-    if (unit !== 'year' && this.state.visibleTimeStart === visibleTimeStart && this.state.visibleTimeEnd === visibleTimeEnd) {
-      let nextUnit = getNextUnit(unit)
-
-      visibleTimeStart = from.startOf(nextUnit).valueOf()
-      visibleTimeEnd = moment(visibleTimeStart).add(1, nextUnit)
-      zoom = visibleTimeEnd - visibleTimeStart
-    }
-
-    this.props.onTimeChange(visibleTimeStart, visibleTimeStart + zoom, this.updateScrollCanvas)
+  onHeaderClick = (from, unit, e) => {
+    this.props.onHeaderClick(from, unit, e);
   }
+
+  // showPeriod = (from, unit) => {
+  //   let visibleTimeStart = from.valueOf()
+  //   let visibleTimeEnd = moment(from).add(1, unit).valueOf()
+  //   let zoom = visibleTimeEnd - visibleTimeStart
+  //   let minZoom = this.props.minZoom;
+  //
+  //   // can't zoom in more than to show one hour
+  //   if (zoom <= minZoom) {
+  //     return
+  //   }
+  //
+  //   // clicked on the big header and already focused here, zoom out
+  //   if (unit !== 'year' && this.state.visibleTimeStart === visibleTimeStart && this.state.visibleTimeEnd === visibleTimeEnd) {
+  //     let nextUnit = getNextUnit(unit)
+  //
+  //     visibleTimeStart = from.startOf(nextUnit).valueOf()
+  //     visibleTimeEnd = moment(visibleTimeStart).add(1, nextUnit)
+  //     zoom = visibleTimeEnd - visibleTimeStart
+  //   }
+  //
+  //   this.props.onTimeChange(visibleTimeStart, visibleTimeStart + zoom, this.updateScrollCanvas)
+  // }
 
   selectItem = (item, clickType, e) => {
     if (this.state.selectedItem === item || (this.props.itemTouchSendsClick && clickType === 'touch')) {
@@ -928,7 +934,8 @@ export default class ReactCalendarTimeline extends Component {
 
   header (canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, timeSteps, headerLabelGroupHeight, headerLabelHeight) {
     return (
-      <Header canvasTimeStart={canvasTimeStart}
+      <Header onHeaderClick={this.props.onHeaderClick}
+              canvasTimeStart={canvasTimeStart}
               hasRightSidebar={this.props.rightSidebarWidth > 0}
               canvasTimeEnd={canvasTimeEnd}
               canvasWidth={canvasWidth}
@@ -943,7 +950,6 @@ export default class ReactCalendarTimeline extends Component {
               visibleTimeEnd={this.state.visibleTimeEnd}
               headerPosition={this.state.headerPosition}
               fixedHeader={this.props.fixedHeader}
-              showPeriod={this.showPeriod}
               headerLabelFormats={this.props.headerLabelFormats}
               subHeaderLabelFormats={this.props.subHeaderLabelFormats} />
     )

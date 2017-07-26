@@ -7,7 +7,7 @@ import { iterateTimes, getNextUnit } from '../utils.js'
 export default class Header extends Component {
   static propTypes = {
     hasRightSidebar: PropTypes.bool.isRequired,
-    showPeriod: PropTypes.func.isRequired,
+    onHeaderClick: PropTypes.func.isRequired,
     canvasTimeStart: PropTypes.number.isRequired,
     canvasTimeEnd: PropTypes.number.isRequired,
     canvasWidth: PropTypes.number.isRequired,
@@ -73,7 +73,7 @@ export default class Header extends Component {
   periodClick = (e) => {
     const {time, unit} = e.target.dataset
     if (time && unit) {
-      this.props.showPeriod(moment(time - 0), unit)
+      this.props.onHeaderClick(moment(time - 0), unit, e);
     }
   }
 
@@ -205,7 +205,7 @@ export default class Header extends Component {
     }
 
     return (
-      <div ref='header' key='header' className='rct-header' onTouchStart={this.touchStart} onTouchEnd={this.touchEnd} onClick={this.periodClick} style={headerStyle}>
+      <div ref='header' key='header' className='rct-header' onTouchStart={this.touchStart} onTouchEnd={this.touchEnd} onClick={this.onHeaderClick} style={headerStyle}>
         {timeLabels}
       </div>
     )
