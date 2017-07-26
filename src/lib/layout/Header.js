@@ -72,7 +72,9 @@ export default class Header extends Component {
 
   periodClick = (e) => {
     const {time, unit} = e.target.dataset
+    console.log(time, unit, e);
     if (time && unit) {
+        console.log('on header click from header');
       this.props.onHeaderClick(moment(time - 0), unit, e);
     }
   }

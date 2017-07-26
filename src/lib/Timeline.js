@@ -641,6 +641,7 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   onHeaderClick = (from, unit, e) => {
+    console.log('on header click from timeline');
     this.props.onHeaderClick(from, unit, e);
   }
 
