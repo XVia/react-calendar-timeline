@@ -11,6 +11,7 @@ export default class Sidebar extends Component {
     lineHeight: PropTypes.number.isRequired,
     groupHeights: PropTypes.array.isRequired,
     fixedHeader: PropTypes.oneOf(['fixed', 'sticky', 'none']),
+    stickyOffset: PropTypes.number,
     headerPosition: PropTypes.oneOf(['top', 'bottom', 'fixed']),
     keys: PropTypes.object.isRequired,
     groupRenderer: PropTypes.func,
@@ -46,7 +47,7 @@ export default class Sidebar extends Component {
 
   render () {
     const {
-      fixedHeader, width, lineHeight, groupHeights, height, headerHeight, isRightSidebar, headerPosition
+      fixedHeader, width, lineHeight, groupHeights, height, headerHeight, isRightSidebar, headerPosition, stickyOffset
     } = this.props
 
     const {groupIdKey, groupTitleKey, groupRightTitleKey} = this.props.keys
@@ -74,7 +75,7 @@ export default class Sidebar extends Component {
         // do nothing - keep at the top
       } else if (headerPosition === 'fixed') {
         headerStyle.position = 'fixed'
-        headerStyle.top = 0
+        headerStyle.top = stickyOffset
         groupsStyle.paddingTop = headerStyle.height
       } else if (headerPosition === 'bottom') {
         headerStyle.position = 'absolute'

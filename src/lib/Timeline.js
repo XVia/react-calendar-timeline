@@ -80,6 +80,7 @@ export default class ReactCalendarTimeline extends Component {
     dragSnap: PropTypes.number,
     minResizeWidth: PropTypes.number,
     fixedHeader: PropTypes.oneOf(['fixed', 'sticky', 'none']),
+    stickyOffset: PropTypes.number,
     fullUpdate: PropTypes.bool,
     lineHeight: PropTypes.number,
     headerLabelGroupHeight: PropTypes.number,
@@ -361,12 +362,13 @@ export default class ReactCalendarTimeline extends Component {
 
   // called on window scroll. it's job is to figure out if we should fix or float the header
   scrollEventListener = (e) => {
-    const { headerLabelGroupHeight, headerLabelHeight } = this.props
+    const { headerLabelGroupHeight, headerLabelHeight, stickyOffset } = this.props
     const headerHeight = headerLabelGroupHeight + headerLabelHeight
 
     const rect = this.refs.container.getBoundingClientRect()
+    const topOffset = stickyOffset ? stickyOffset : 0
 
-    if (rect.top > 0) {
+    if (rect.top > topOffset) {
       this.setState({ headerPosition: 'top' })
     } else if (rect.bottom < headerHeight) {
       this.setState({ headerPosition: 'bottom' })
