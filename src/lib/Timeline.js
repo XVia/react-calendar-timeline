@@ -952,6 +952,7 @@ export default class ReactCalendarTimeline extends Component {
               visibleTimeEnd={this.state.visibleTimeEnd}
               headerPosition={this.state.headerPosition}
               fixedHeader={this.props.fixedHeader}
+              stickyOffset={this.props.stickyOffset}
               headerLabelFormats={this.props.headerLabelFormats}
               subHeaderLabelFormats={this.props.subHeaderLabelFormats} />
     )
@@ -968,7 +969,7 @@ export default class ReactCalendarTimeline extends Component {
                groupHeights={groupHeights}
                height={height}
                headerHeight={headerHeight}
-
+               stickyOffset={this.props.stickyOffset}
                headerPosition={this.state.headerPosition}
                fixedHeader={this.props.fixedHeader}>
         {this.props.sidebarContent}
