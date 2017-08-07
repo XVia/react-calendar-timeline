@@ -20,6 +20,7 @@ export default class Header extends Component {
     headerLabelFormats: PropTypes.object.isRequired,
     subHeaderLabelFormats: PropTypes.object.isRequired,
     fixedHeader: PropTypes.oneOf(['fixed', 'sticky', 'none']),
+    stickyOffset: PropTypes.number,
     headerPosition: PropTypes.oneOf(['top', 'bottom', 'fixed'])
   }
 
@@ -115,7 +116,7 @@ export default class Header extends Component {
     const {
       canvasTimeStart, canvasTimeEnd, canvasWidth, lineHeight,
       visibleTimeStart, visibleTimeEnd, minUnit, timeSteps, fixedHeader, headerPosition,
-      headerLabelGroupHeight, headerLabelHeight, hasRightSidebar, width
+      headerLabelGroupHeight, headerLabelHeight, hasRightSidebar, width, stickyOffset
     } = this.props
 
     const ratio = canvasWidth / (canvasTimeEnd - canvasTimeStart)
@@ -195,7 +196,7 @@ export default class Header extends Component {
         // do nothing, keep at the top
       } else if (headerPosition === 'fixed') {
         headerStyle.position = 'fixed'
-        headerStyle.top = 0
+        headerStyle.top = stickyOffset
         headerStyle.width = `${width}px`
       } else if (headerPosition === 'bottom') {
         headerStyle.position = 'absolute'
