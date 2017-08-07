@@ -14,7 +14,7 @@ import CursorLine from './lines/CursorLine'
 
 import windowResizeDetector from '../resize-detector/window'
 
-import { getMinUnit, getNextUnit, getParentPosition, _get, _length, stack, nostack, calculateDimensions, getGroupOrders, getVisibleItems, hasSomeParentTheClass } from './utils.js'
+import { getMinUnit, getNextUnit, getParentPosition, _get, _length, stack, nostack, stackFixedGroupHeight, calculateDimensions, getGroupOrders, getVisibleItems, hasSomeParentTheClass } from './utils.js'
 
 export const defaultKeys = {
   groupIdKey: 'id',
@@ -98,6 +98,7 @@ export default class ReactCalendarTimeline extends Component {
     canSelect: PropTypes.bool,
 
     stackItems: PropTypes.bool,
+    groupHeight: PropTypes.number,
 
     traditionalZoom: PropTypes.bool,
     showCursorLine: PropTypes.bool,
@@ -223,6 +224,7 @@ export default class ReactCalendarTimeline extends Component {
     canSelect: true,
 
     stackItems: false,
+    groupHeight: false,
 
     traditionalZoom: false,
     showCursorLine: false,
@@ -1004,7 +1006,7 @@ export default class ReactCalendarTimeline extends Component {
       }
     }
 
-    const { keys, dragSnap, lineHeight, headerLabelGroupHeight, headerLabelHeight, stackItems, fullUpdate, itemHeightRatio } = this.props
+    const { keys, dragSnap, lineHeight, headerLabelGroupHeight, headerLabelHeight, stackItems, fullUpdate, itemHeightRatio, groupHeight } = this.props
     const { draggingItem, dragTime, resizingItem, resizingEdge, resizeTime, newGroupOrder } = this.state
     const zoom = visibleTimeEnd - visibleTimeStart
     const canvasTimeEnd = canvasTimeStart + zoom * 3
@@ -1053,13 +1055,19 @@ export default class ReactCalendarTimeline extends Component {
       return memo
     }, [])
 
-    const stackingMethod = stackItems ? stack : nostack
+    let stackingMethod = nostack;
+
+    if (stackItems) {
+      stackingMethod = groupHeight ? stackFixedGroupHeight : stack;
+    }
 
     const { height, groupHeights, groupTops } = stackingMethod(
       dimensionItems,
       groupOrders,
       lineHeight,
-      headerHeight
+      headerHeight,
+      false,
+      groupHeight
     )
 
     return {dimensionItems, height, groupHeights, groupTops}

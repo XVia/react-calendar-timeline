@@ -295,6 +295,41 @@ export function nostack (items, groupOrders, lineHeight, headerHeight, force) {
   }
 }
 
+export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight) {
+  var i, iMax
+  var totalHeight = headerHeight
+
+  var groupHeights = []
+  var groupTops = []
+
+  var groupedItems = getGroupedItems(items, groupOrders)
+
+  groupedItems.forEach(function (group, index, array) {
+    // calculate new, non-overlapping positions
+    groupTops.push(totalHeight)
+
+    const groupItemCount = group.length;
+    var verticalMargin = 0
+    for (i = 0, iMax = group.length; i < iMax; i++) {
+      var item = group[i]
+      if (iMax > 0) {
+        item.dimensions.height = Math.round(groupHeight / iMax);
+        const lastItemHeight = group[i - 1] ? group[i - 1].dimensions.height : 0;
+        item.dimensions.top = totalHeight + verticalMargin + (lastItemHeight * i);
+      }
+    }
+
+    groupHeights.push(groupHeight)
+    totalHeight += groupHeight
+  })
+
+  return {
+    height: totalHeight,
+    groupHeights,
+    groupTops
+  }
+}
+
 export function keyBy (value, key) {
   let obj = {}
 
