@@ -188,6 +188,8 @@ export default class Header extends Component {
       lineHeight: `${lineHeight}px`
     }
 
+    let stickyClass = '';
+
     if (fixedHeader === 'fixed') {
       headerStyle.position = 'fixed'
       headerStyle.width = `${width}px`
@@ -198,6 +200,7 @@ export default class Header extends Component {
         headerStyle.position = 'fixed'
         headerStyle.top = stickyOffset
         headerStyle.width = `${width}px`
+        stickyClass = 'sticky'
       } else if (headerPosition === 'bottom') {
         headerStyle.position = 'absolute'
         headerStyle.bottom = 0
@@ -206,7 +209,7 @@ export default class Header extends Component {
     }
 
     return (
-      <div ref='header' key='header' className='rct-header' onTouchStart={this.touchStart} onTouchEnd={this.touchEnd} onClick={this.periodClick} style={headerStyle}>
+      <div ref='header' key='header' className={`rct-header ${stickyClass}`} onTouchStart={this.touchStart} onTouchEnd={this.touchEnd} onClick={this.periodClick} style={headerStyle}>
         {timeLabels}
       </div>
     )
