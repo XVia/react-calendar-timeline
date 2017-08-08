@@ -295,6 +295,107 @@ export function nostack (items, groupOrders, lineHeight, headerHeight, force) {
   }
 }
 
+function horizontalCollision(a, b) {
+  const aRight = a.left + a.width;
+  const bRight = b.left + b.width;
+  return !( aRight < b.left || a.left > bRight );
+}
+
+export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight) {
+  const itemSpacing = 3;
+  let i;
+  let totalHeight = headerHeight;
+
+  let groupHeights = [];
+  let groupTops = [];
+
+  let groupedItems = getGroupedItems(items, groupOrders)
+
+  groupedItems.forEach(function (group, index, array) {
+    // calculate new, non-overlapping positions
+    groupTops.push(totalHeight);
+
+    // first set them all to the same top position
+    // default height to groupHeight
+    group.forEach(item => {
+      item.dimensions.top = totalHeight + itemSpacing
+      item.dimensions.height = (groupHeight / 2)
+    });
+
+    let collidingItems = {};
+
+    // loop through each item in the group and check if it collides with any others
+    for (i = 0; i < group.length; i++) {
+      let item = group[i]
+
+      for (var j = 0; j < group.length; j++) {
+        var other = group[j]
+        if (other !== item && horizontalCollision(item.dimensions, other.dimensions)) {
+          collidingItems[item.id] = collidingItems[item.id] || [item];
+          collidingItems[item.id].push(other);
+        }
+      }
+    }
+
+    // Make a sorted list of collidingItems by comparing the length of each list.
+    // The longer lists need to be dealt with last since having more
+    // collisding items will make the line height smaller for each item.
+    const list = Object.keys(collidingItems).sort((a, b) => {
+      const itemGroupA = collidingItems[a];
+      const itemGroupB = collidingItems[b];
+      const diff = itemGroupA.length - itemGroupB.length;
+
+      if (diff === 0) {
+        return 0;
+      } else if (diff < 0) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
+
+    // loop through the sorted collided items
+    list.forEach(itemId => {
+      let items = collidingItems[itemId];
+
+      // sort each item by id so they are in a consistent order
+      items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
+
+      // adjusted height after accounting for itemVerticalMargin
+      let groupHeightAdjusted = groupHeight - (itemSpacing * (items.length + 1));
+
+      // dynamic line height to fit items into the group height
+      let lineHeight = Math.floor(groupHeightAdjusted / items.length);
+
+      let itemSpacingTotal = itemSpacing;
+
+      // Loop through this set of collided items
+      // and set the new dimensions for each one.
+      // Bump each one down to the next lineHeight so they stack.
+      for (i = 0; i < items.length; i++) {
+        const item = items[i];
+        // top offset relative to this group
+        const topOffset = (lineHeight * i) + itemSpacingTotal;
+
+        // set the new dimensions to stack them
+        item.dimensions.top = totalHeight + topOffset;
+        item.dimensions.height = lineHeight;
+
+        itemSpacingTotal += itemSpacing;
+      }
+    });
+
+    groupHeights.push(groupHeight)
+    totalHeight += groupHeight
+  });
+
+  return {
+    height: totalHeight,
+    groupHeights,
+    groupTops
+  }
+}
+
 export function keyBy (value, key) {
   let obj = {}
 
