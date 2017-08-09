@@ -291,7 +291,8 @@ export function nostack (items, groupOrders, lineHeight, headerHeight, force) {
   return {
     height: totalHeight,
     groupHeights,
-    groupTops
+    groupTops,
+    groupedItems
   }
 }
 
@@ -315,11 +316,18 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
     // calculate new, non-overlapping positions
     groupTops.push(totalHeight);
 
+    // if (group.length > 3) {
+    //     group.splice(0, 3)
+    // }
+
     // first set them all to the same top position
     // default height to groupHeight
-    group.forEach(item => {
+    group.forEach((item, idx) => {
       item.dimensions.top = totalHeight + itemSpacing
       item.dimensions.height = (groupHeight / 2)
+      if (idx > 2) {
+          item.hide = true;
+      }
     });
 
     let collidingItems = {};
@@ -361,8 +369,13 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       // sort each item by id so they are in a consistent order
       items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
 
+      // NOTE: subtract height of show more if group has
+
       // adjusted height after accounting for itemVerticalMargin
       let groupHeightAdjusted = groupHeight - (itemSpacing * (items.length + 1));
+
+      // if group has show more, then subtract
+      groupHeightAdjusted -= 18;
 
       // dynamic line height to fit items into the group height
       let lineHeight = Math.floor(groupHeightAdjusted / items.length);
@@ -392,7 +405,8 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
   return {
     height: totalHeight,
     groupHeights,
-    groupTops
+    groupTops,
+    groupedItems
   }
 }
 
