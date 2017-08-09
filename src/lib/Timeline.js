@@ -578,13 +578,14 @@ export default class ReactCalendarTimeline extends Component {
     if (resetCanvas || forceUpdateDimensions || fullUpdate) {
       const canvasTimeStart = newState.canvasTimeStart ? newState.canvasTimeStart : oldCanvasTimeStart
       const {
-        dimensionItems, height, groupHeights, groupTops, groupedItems
+        dimensionItems, height, groupHeights, groupTops, groupedItems, showMoreButtons
       } = this.stackItems(items, groups, canvasTimeStart, visibleTimeStart, visibleTimeEnd, this.state.width, fullUpdate)
       newState.dimensionItems = dimensionItems
       newState.height = height
       newState.groupHeights = groupHeights
       newState.groupTops = groupTops
       newState.groupedItems = groupedItems
+      newState.showMoreButtons = showMoreButtons
     }
 
     this.setState(newState)
@@ -1074,9 +1075,9 @@ export default class ReactCalendarTimeline extends Component {
     }
 
     // Generate the things for show more
-    const showMoreButtons = this.getShowMorebuttons(items, groups, canvasTimeStart, canvasTimeEnd, canvasWidth, headerHeight);
+    const showMoreButtons = this.getShowMorebuttons(items, groups);
 
-    console.log(showMoreButtons)
+    console.log(showMoreButtons);
 
     const { height, groupHeights, groupTops, groupedItems } = stackingMethod(
       dimensionItems,
@@ -1085,6 +1086,7 @@ export default class ReactCalendarTimeline extends Component {
       headerHeight,
       false,
       groupHeight,
+      showMoreButtons
     )
 
     return { dimensionItems, height, groupHeights, groupTops, groupedItems, showMoreButtons }
@@ -1178,7 +1180,7 @@ export default class ReactCalendarTimeline extends Component {
     return React.Children.map(childArray, child => React.cloneElement(child, childProps))
   }
 
-  getShowMorebuttons(items, groups, canvasTimeStart, canvasTimeEnd, canvasWidth, headerHeight) {
+  getShowMorebuttons(items, groups) {
       const { minUnit, timeSteps, height } = this.props
       const { visibleTimeEnd, visibleTimeStart, groupHeights } = this.state;
       const timeframe = 'days';
@@ -1234,24 +1236,27 @@ export default class ReactCalendarTimeline extends Component {
            }
        }
 
-
-       // Set the left dimension on the showMoreButton
-       iterateTimes(canvasTimeStart, canvasTimeEnd, 'day', timeSteps, (time, nextTime) => {
-          showMoreButtons.forEach(button => {
-              const ratio = canvasWidth / (canvasTimeEnd - canvasTimeStart)
-              if (button.date === time.format('MM-DD-YYYY')) {
-                button.left = Math.round((time.valueOf() - canvasTimeStart) * 0.0000011792379712301588, -2)
-              }
-          })
-        })
-
-        // Set the top
-        showMoreButtons.forEach(button => {
-          button.items = button.items.reverse();
-          button.top = headerHeight + this.props.groupHeight * (groups.length - (button.groupId - 1)) - 18
-        })
-
       return showMoreButtons;
+  }
+
+  getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups) {
+     // Set the left dimension on the showMoreButton
+     iterateTimes(canvasTimeStart, canvasTimeEnd, 'day', timeSteps, (time, nextTime) => {
+        showMoreButtons.forEach(button => {
+            const ratio = canvasWidth / (canvasTimeEnd - canvasTimeStart)
+            if (button.date === time.format('MM-DD-YYYY')) {
+              button.left = Math.round((time.valueOf() - canvasTimeStart) * ratio, -2)
+            }
+        })
+      })
+
+      // Set the top
+      showMoreButtons.forEach(button => {
+        button.items = button.items.reverse();
+        button.top = headerHeight + this.props.groupHeight * (groups.length - (button.groupId - 1)) - 18
+      })
+
+      return showMoreButtons
   }
 
   showMoreButtons(buttons) {
@@ -1289,8 +1294,8 @@ export default class ReactCalendarTimeline extends Component {
 
   render () {
     const { items, groups, headerLabelGroupHeight, headerLabelHeight, sidebarWidth, rightSidebarWidth, timeSteps, showCursorLine } = this.props
-    const { draggingItem, resizingItem, isDragging, width, visibleTimeStart, visibleTimeEnd, canvasTimeStart, mouseOverCanvas, cursorTime, showMore, showMoreButtons } = this.state
-    let { dimensionItems, height, groupHeights, groupTops, groupedItems } = this.state
+    const { draggingItem, resizingItem, isDragging, width, visibleTimeStart, visibleTimeEnd, canvasTimeStart, mouseOverCanvas, cursorTime, showMore } = this.state
+    let { dimensionItems, height, groupHeights, groupTops, groupedItems, showMoreButtons } = this.state
 
     const zoom = visibleTimeEnd - visibleTimeStart
     const canvasTimeEnd = canvasTimeStart + zoom * 3
@@ -1306,6 +1311,8 @@ export default class ReactCalendarTimeline extends Component {
       groupTops = stackResults.groupTops
       groupedItems = stackResults.groupedItems
     }
+
+    showMoreButtons = this.getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups);
 
     const outerComponentStyle = {
       height: `${height}px`,
