@@ -302,7 +302,7 @@ function horizontalCollision(a, b) {
   return !( aRight < b.left || a.left > bRight );
 }
 
-export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight) {
+export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, showMoreButtons) {
   const itemSpacing = 3;
   let i;
   let totalHeight = headerHeight;
@@ -316,9 +316,8 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
     // calculate new, non-overlapping positions
     groupTops.push(totalHeight);
 
-    // if (group.length > 3) {
-    //     group.splice(0, 3)
-    // }
+    // Reverse the group so things show up right
+    group = group.reverse();
 
     // first set them all to the same top position
     // default height to groupHeight
@@ -326,9 +325,11 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       item.dimensions.top = totalHeight + itemSpacing
       item.dimensions.height = (groupHeight / 2)
       if (idx > 2) {
-          item.hide = true;
+          item.dimensions.hide = true;
       }
     });
+
+    const hasShowMore = showMoreButtons.find(button => button.groupId === index);
 
     let collidingItems = {};
 
@@ -374,8 +375,10 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       // adjusted height after accounting for itemVerticalMargin
       let groupHeightAdjusted = groupHeight - (itemSpacing * (items.length + 1));
 
-      // if group has show more, then subtract
-      groupHeightAdjusted -= 18;
+      if (hasShowMore && hasShowMore.length) {
+          // if group has show more, then subtract
+          groupHeightAdjusted -= 18;
+      }
 
       // dynamic line height to fit items into the group height
       let lineHeight = Math.floor(groupHeightAdjusted / items.length);

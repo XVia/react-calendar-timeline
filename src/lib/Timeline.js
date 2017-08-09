@@ -1077,8 +1077,6 @@ export default class ReactCalendarTimeline extends Component {
     // Generate the things for show more
     const showMoreButtons = this.getShowMorebuttons(items, groups);
 
-    console.log(showMoreButtons);
-
     const { height, groupHeights, groupTops, groupedItems } = stackingMethod(
       dimensionItems,
       groupOrders,
@@ -1252,7 +1250,7 @@ export default class ReactCalendarTimeline extends Component {
 
       // Set the top
       showMoreButtons.forEach(button => {
-        button.items = button.items.reverse();
+        // button.items = button.items.reverse();
         button.top = headerHeight + this.props.groupHeight * (groups.length - (button.groupId - 1)) - 18
       })
 
