@@ -12,9 +12,9 @@ export default class showMoreButton extends Component {
     const { button } = this.props
 
     return (
-      <div className='rct-show-more-buton'
-           style={{ position: 'absolute', top: button.top, left: button.left, zIndex: 100 }}>
-        <a onClick={this.handleClick.bind(this)}>Show more +</a>
+      <div className='rct-show-more-button'
+           style={{ position: 'absolute', top: button.top, left: button.left, zIndex: 100, userSelect: 'none' }}>
+        <a onClick={this.handleClick.bind(this)}>{button.items.length - 3}+ more </a>
       </div>
     )
   }
