@@ -505,9 +505,9 @@ export default class ReactCalendarTimeline extends Component {
     } else {
         diffLeft = scrollX - canvasWidth;
     }
+    // this.setState({ showMorePosition: { diffLeft, diffTop, top, left, width } });
 
-
-    this.setState({ showMorePosition: { diffLeft, diffTop, top, left, width } });
+    this.setState({ showMore: null });
 
     // move the virtual canvas if needed, close the popup
     if (scrollX < this.state.width * 0.5) {
@@ -1374,8 +1374,7 @@ export default class ReactCalendarTimeline extends Component {
 
   handleShowMoreClick(evt, buttonsProps) {
       const { left, top, width } = evt.currentTarget.getBoundingClientRect()
-      const { diffLeft, diffTop } = this.state.showMorePosition;
-      this.setState({ showMore: buttonsProps, showMorePosition: { top, left, diffLeft, diffTop, width } });
+      this.setState({ showMore: buttonsProps, showMorePosition: { top, left, diffLeft: 0, diffTop: 0, width } });
   }
 
   render () {
