@@ -16,6 +16,7 @@ import ShowMoreButton from './layout/ShowMoreButton'
 import windowResizeDetector from '../resize-detector/window'
 
 import WatchForClickOut from 'xv/util/WatchForClickOut';
+const ReactCSSTransitionGroup = require('react-addons-css-transition-group'); // ES5 with npm
 
 import { iterateTimes, getMinUnit, getNextUnit, getParentPosition, _get, _length, stack, nostack, stackFixedGroupHeight, calculateDimensions, getGroupOrders, getVisibleItems, hasSomeParentTheClass } from './utils.js'
 
@@ -125,6 +126,7 @@ export default class ReactCalendarTimeline extends Component {
     onHeaderClick: PropTypes.func,
 
     moveResizeValidator: PropTypes.func,
+    timeFrame: PropTypes.string,
 
     itemRenderer: PropTypes.func,
     groupRenderer: PropTypes.func,
@@ -322,7 +324,11 @@ export default class ReactCalendarTimeline extends Component {
       resizingItem: null,
       resizingEdge: null,
 
-      showMore: null
+      showMore: null,
+
+      oldScrollDiff: 0,
+
+      timeframe: props.timeframe ? props.timeframe : 'day'
     }
 
     const {
@@ -488,14 +494,22 @@ export default class ReactCalendarTimeline extends Component {
     const canvasTimeStart = this.state.canvasTimeStart
     const scrollX = scrollComponent.scrollLeft ? scrollComponent.scrollLeft : 0;
     const zoom = this.state.visibleTimeEnd - this.state.visibleTimeStart
-    const width = this.state.width
-    const visibleTimeStart = canvasTimeStart + (zoom * scrollX / width)
+    const canvasWidth = this.state.width
+    const visibleTimeStart = canvasTimeStart + (zoom * scrollX / canvasWidth)
 
-    let { showMorePosition, showMore } = this.state;
+    let { diffLeft, diffTop, top, left, width } = this.state.showMorePosition;
+    const { oldScrollDiff } = this.state;
 
-    showMorePosition.diffLeft = scrollX - width;
+    if (oldScrollDiff) {
+        diffLeft = scrollX - canvasWidth;
+    } else {
+        diffLeft = scrollX - canvasWidth;
+    }
 
-    // move the virtual canvas if needed
+
+    this.setState({ showMorePosition: { diffLeft, diffTop, top, left, width } });
+
+    // move the virtual canvas if needed, close the popup
     if (scrollX < this.state.width * 0.5) {
       this.setState({
         showMore: null,
@@ -515,16 +529,19 @@ export default class ReactCalendarTimeline extends Component {
       this.props.onTimeChange(visibleTimeStart, visibleTimeStart + zoom, this.updateScrollCanvas)
     }
 
-    this.setState({ showMorePosition });
   }
 
   componentWillReceiveProps (nextProps) {
-    const { visibleTimeStart, visibleTimeEnd, items, groups, sidebarWidth } = nextProps
+    const { visibleTimeStart, visibleTimeEnd, items, groups, sidebarWidth, timeframe } = nextProps
 
     if (visibleTimeStart && visibleTimeEnd) {
       this.updateScrollCanvas(visibleTimeStart, visibleTimeEnd, items !== this.props.items || groups !== this.props.groups, items, groups)
     } else if (items !== this.props.items || groups !== this.props.groups) {
       this.updateDimensions(items, groups)
+    }
+
+    if (timeframe) {
+        this.setState({ timeframe });
     }
 
     // resize if the sidebar width changed
@@ -1190,7 +1207,30 @@ export default class ReactCalendarTimeline extends Component {
   getShowMorebuttons(items, groups) {
       const { minUnit, timeSteps, height } = this.props
       const { visibleTimeEnd, visibleTimeStart, groupHeights } = this.state;
-      const timeframe = 'days';
+      let { timeframe } = this.state;
+      let format;
+
+      // set the current timeframe and format
+      switch(timeframe) {
+          case 'hour':
+            timeframe = 'hour'
+            format = 'MM-DD-YYYY-LT'
+            break;
+          case 'day':
+          case 'week':
+            timeframe = 'day'
+            format = 'MM-DD-YYYY'
+            break;
+          case 'quarter':
+          case 'month':
+            timeframe = 'month'
+            format = 'MM-YYYY'
+            break
+          case 'year':
+            timeframe = 'year'
+            format = 'YYYY'
+            break
+      }
 
       // Init empty array of showMoreButtons
       let showMoreButtons = [];
@@ -1204,16 +1244,17 @@ export default class ReactCalendarTimeline extends Component {
 
       const start = moment(visibleTimeStart)
       const end = moment(visibleTimeEnd)
-      const totalDays = end.diff(start, timeframe)
+      const totalSlots = end.diff(start, timeframe)
 
       // Build out skeleton list
-      for (let i = 0; i < totalDays; i++) {
-        const date = moment(start.add(1, timeframe)).format('MM-DD-YYYY')
+      for (let i = 0; i < totalSlots; i++) {
+        const slot = moment(start.add(1, timeframe)).format(format)
         // Attach dates to the objectKeyedByGroup
         for (var group in objectKeyedByGroup) {
-            objectKeyedByGroup[group][date] = []
+            objectKeyedByGroup[group][slot] = []
         }
       }
+
         // Go through items and add them to dates per group
         items.forEach(item => {
             const start = moment(item.start_time)
@@ -1227,15 +1268,15 @@ export default class ReactCalendarTimeline extends Component {
 
         // See if we need a show more button based on some length (3)
        for (var group in objectKeyedByGroup) {
-           for (var date in objectKeyedByGroup[group]) {
-               if (objectKeyedByGroup[group][date].length > 3) {
-                   const showMoreButtonId = `${group}-${date}`
+           for (var slot in objectKeyedByGroup[group]) {
+               if (objectKeyedByGroup[group][slot].length > 3) {
+                   const showMoreButtonId = `${group}-${slot}`
                    showMoreButtons.push({
                        id: showMoreButtonId,
                        groupId: parseInt(group),
                        timeframe,
-                       date,
-                       items: objectKeyedByGroup[group][date]
+                       slot,
+                       items: objectKeyedByGroup[group][slot]
                    })
                }
            }
@@ -1244,12 +1285,35 @@ export default class ReactCalendarTimeline extends Component {
       return showMoreButtons;
   }
 
-  getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups) {
+  getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups, timeframe) {
+      let format;
+      // set the current timeframe and format
+      switch(timeframe) {
+          case 'hour':
+            timeframe = 'hour'
+            format = 'MM-DD-YYYY-LT'
+            break;
+          case 'day':
+          case 'week':
+            timeframe = 'day'
+            format = 'MM-DD-YYYY'
+            break;
+          case 'quarter':
+          case 'month':
+            timeframe = 'month'
+            format = 'MM-YYYY'
+            break
+          case 'year':
+            timeframe = 'year'
+            format = 'YYYY'
+            break
+      }
+
      // Set the left dimension on the buttons
-     iterateTimes(canvasTimeStart, canvasTimeEnd, 'day', timeSteps, (time, nextTime) => {
+     iterateTimes(canvasTimeStart, canvasTimeEnd, timeframe, timeSteps, (time, nextTime) => {
         showMoreButtons.forEach(button => {
             const ratio = canvasWidth / (canvasTimeEnd - canvasTimeStart)
-            if (button.date === time.format('MM-DD-YYYY')) {
+            if (button.slot === time.format(format)) {
               button.left = Math.round((time.valueOf() - canvasTimeStart) * ratio, -2) + 6
             }
         })
@@ -1274,7 +1338,8 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   onClickOut(evt) {
-     this.setState({ showMore: null })
+     const { diffLeft } = this.state.showMorePosition
+     this.setState({ showMore: null, oldScrollDiff: diffLeft })
   }
 
   onShowMoreItemClick(item, evt) {
@@ -1309,12 +1374,13 @@ export default class ReactCalendarTimeline extends Component {
 
   handleShowMoreClick(evt, buttonsProps) {
       const { left, top, width } = evt.currentTarget.getBoundingClientRect()
-      this.setState({ showMore: buttonsProps, showMorePosition: { top, left, diffLeft: 0, diffTop: 0, width } });
+      const { diffLeft, diffTop } = this.state.showMorePosition;
+      this.setState({ showMore: buttonsProps, showMorePosition: { top, left, diffLeft, diffTop, width } });
   }
 
   render () {
     const { items, groups, headerLabelGroupHeight, headerLabelHeight, sidebarWidth, rightSidebarWidth, timeSteps, showCursorLine } = this.props
-    const { draggingItem, resizingItem, isDragging, width, visibleTimeStart, visibleTimeEnd, canvasTimeStart, mouseOverCanvas, cursorTime, showMore, showMorePosition } = this.state
+    const { draggingItem, resizingItem, isDragging, width, visibleTimeStart, visibleTimeEnd, canvasTimeStart, mouseOverCanvas, cursorTime, showMore, showMorePosition, timeframe } = this.state
     let { dimensionItems, height, groupHeights, groupTops, groupedItems, showMoreButtons } = this.state
 
     const zoom = visibleTimeEnd - visibleTimeStart
@@ -1332,7 +1398,7 @@ export default class ReactCalendarTimeline extends Component {
       groupedItems = stackResults.groupedItems
     }
 
-    showMoreButtons = this.getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups);
+    showMoreButtons = this.getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups, timeframe);
 
     const outerComponentStyle = {
       height: `${height}px`,
