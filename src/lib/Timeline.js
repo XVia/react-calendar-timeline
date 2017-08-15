@@ -497,29 +497,17 @@ export default class ReactCalendarTimeline extends Component {
     const canvasWidth = this.state.width
     const visibleTimeStart = canvasTimeStart + (zoom * scrollX / canvasWidth)
 
-    let { diffLeft, diffTop, top, left, width } = this.state.showMorePosition;
-    const { oldScrollDiff } = this.state;
-
-    if (oldScrollDiff) {
-        diffLeft = scrollX - canvasWidth;
-    } else {
-        diffLeft = scrollX - canvasWidth;
-    }
-    // this.setState({ showMorePosition: { diffLeft, diffTop, top, left, width } });
-
     this.setState({ showMore: null });
 
     // move the virtual canvas if needed, close the popup
     if (scrollX < this.state.width * 0.5) {
       this.setState({
-        showMore: null,
         canvasTimeStart: this.state.canvasTimeStart - zoom
       })
       scrollComponent.scrollLeft += this.state.width
     }
     if (scrollX > this.state.width * 1.5) {
       this.setState({
-        showMore: null,
         canvasTimeStart: this.state.canvasTimeStart + zoom
       })
       scrollComponent.scrollLeft -= this.state.width
@@ -620,43 +608,43 @@ export default class ReactCalendarTimeline extends Component {
     this.changeZoom(1.0 + speed * deltaY / 500, xPosition / this.state.width)
   }
 
-  onWheel = (e) => {
-    const { traditionalZoom } = this.props
-
-    e.preventDefault()
-
-    // zoom in the time dimension
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      const parentPosition = getParentPosition(e.currentTarget)
-      const xPosition = e.clientX - parentPosition.x
-
-      const speed = e.ctrlKey ? 10 : e.metaKey ? 3 : 1
-
-      this.zoomWithWheel(speed, xPosition, e.deltaY)
-
-    // convert vertical zoom to horiziontal
-    } else if (e.shiftKey) {
-      const scrollComponent = this.refs.scrollComponent
-      scrollComponent.scrollLeft += e.deltaY
-
-    // no modifier pressed? we prevented the default event, so scroll or zoom as needed
-    } else {
-      if (e.deltaX !== 0) {
-        if (!traditionalZoom) {
-          this.refs.scrollComponent.scrollLeft += e.deltaX
-        }
-      }
-      if (e.deltaY !== 0) {
-        window.scrollTo(window.pageXOffset, window.pageYOffset + e.deltaY)
-        if (traditionalZoom) {
-          const parentPosition = getParentPosition(e.currentTarget)
-          const xPosition = e.clientX - parentPosition.x
-
-          this.zoomWithWheel(10, xPosition, e.deltaY)
-        }
-      }
-    }
-  }
+  // onWheel = (e) => {
+  //   const { traditionalZoom } = this.props
+  //
+  //   e.preventDefault()
+  //
+  //   // zoom in the time dimension
+  //   if (e.ctrlKey || e.metaKey || e.altKey) {
+  //     const parentPosition = getParentPosition(e.currentTarget)
+  //     const xPosition = e.clientX - parentPosition.x
+  //
+  //     const speed = e.ctrlKey ? 10 : e.metaKey ? 3 : 1
+  //
+  //     this.zoomWithWheel(speed, xPosition, e.deltaY)
+  //
+  //   // convert vertical zoom to horiziontal
+  //   } else if (e.shiftKey) {
+  //     const scrollComponent = this.refs.scrollComponent
+  //     scrollComponent.scrollLeft += e.deltaY
+  //
+  //   // no modifier pressed? we prevented the default event, so scroll or zoom as needed
+  //   } else {
+  //     if (e.deltaX !== 0) {
+  //       if (!traditionalZoom) {
+  //         this.refs.scrollComponent.scrollLeft += e.deltaX
+  //       }
+  //     }
+  //     if (e.deltaY !== 0) {
+  //       window.scrollTo(window.pageXOffset, window.pageYOffset + e.deltaY)
+  //       if (traditionalZoom) {
+  //         const parentPosition = getParentPosition(e.currentTarget)
+  //         const xPosition = e.clientX - parentPosition.x
+  //
+  //         this.zoomWithWheel(10, xPosition, e.deltaY)
+  //       }
+  //     }
+  //   }
+  // }
 
   zoomIn (e) {
     e.preventDefault()
@@ -1433,7 +1421,6 @@ export default class ReactCalendarTimeline extends Component {
                className='rct-scroll'
                style={scrollComponentStyle}
                onScroll={this.onScroll}
-               onWheel={this.onWheel}
                onMouseDown={this.handleMouseDown}
                onMouseMove={this.handleMouseMove}
                onMouseUp={this.handleMouseUp}
