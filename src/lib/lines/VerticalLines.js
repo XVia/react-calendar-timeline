@@ -41,13 +41,13 @@ export default class VerticalLines extends Component {
     let lines = []
 
     iterateTimes(canvasTimeStart, canvasTimeEnd, minUnit, timeSteps, (time, nextTime) => {
+
       const left = Math.round((time.valueOf() - canvasTimeStart) * ratio, -2)
       const minUnitValue = time.get(minUnit === 'day' ? 'date' : minUnit)
       const firstOfType = minUnitValue === (minUnit === 'day' ? 1 : 0)
       const lineWidth = firstOfType ? 2 : 1
       const labelWidth = Math.ceil((nextTime.valueOf() - time.valueOf()) * ratio) - lineWidth
       const leftPush = this.props.fixedHeader !== 'none' && firstOfType ? -1 : 0
-
       const classNames = 'rct-vl' +
                          (firstOfType ? ' rct-vl-first' : '') +
                          (minUnit === 'day' || minUnit === 'hour' || minUnit === 'minute' ? ` rct-day-${time.day()}` : '')

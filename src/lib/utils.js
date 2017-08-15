@@ -291,7 +291,8 @@ export function nostack (items, groupOrders, lineHeight, headerHeight, force) {
   return {
     height: totalHeight,
     groupHeights,
-    groupTops
+    groupTops,
+    groupedItems
   }
 }
 
@@ -301,7 +302,7 @@ function horizontalCollision(a, b) {
   return !( aRight < b.left || a.left > bRight );
 }
 
-export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight) {
+export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, showMoreButtons) {
   const itemSpacing = 3;
   let i;
   let totalHeight = headerHeight;
@@ -315,12 +316,20 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
     // calculate new, non-overlapping positions
     groupTops.push(totalHeight);
 
+    // Reverse the group so things show up right
+    group = group.reverse();
+
     // first set them all to the same top position
     // default height to groupHeight
-    group.forEach(item => {
+    group.forEach((item, idx) => {
       item.dimensions.top = totalHeight + itemSpacing
       item.dimensions.height = (groupHeight / 2)
+      if (idx > 2) {
+          item.dimensions.hide = true;
+      }
     });
+
+    const hasShowMore = showMoreButtons.find(button => button.groupId === index);
 
     let collidingItems = {};
 
@@ -362,24 +371,32 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
 
       // adjusted height after accounting for itemVerticalMargin
-      let groupHeightAdjusted = groupHeight - (itemSpacing * (items.length + 1));
+      let groupHeightAdjusted = groupHeight - (itemSpacing * (3));
+
+      if (hasShowMore) {
+          // if group has show more, then subtract
+          groupHeightAdjusted -= 18;
+      }
 
       // dynamic line height to fit items into the group height
-      let lineHeight = Math.floor(groupHeightAdjusted / items.length);
+      let lineHeight = Math.floor(groupHeightAdjusted / 3);
 
       let itemSpacingTotal = itemSpacing;
 
       // Loop through this set of collided items
       // and set the new dimensions for each one.
       // Bump each one down to the next lineHeight so they stack.
-      for (i = 0; i < items.length; i++) {
+      let max = hasShowMore ? 3 : items.length
+      for (i = 0; i < max; i++) {
         const item = items[i];
         // top offset relative to this group
         const topOffset = (lineHeight * i) + itemSpacingTotal;
 
-        // set the new dimensions to stack them
-        item.dimensions.top = totalHeight + topOffset;
-        item.dimensions.height = lineHeight;
+        if (item) {
+            // set the new dimensions to stack them
+            item.dimensions.top = totalHeight + topOffset;
+            item.dimensions.height = lineHeight;
+        }
 
         itemSpacingTotal += itemSpacing;
       }
@@ -392,7 +409,8 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
   return {
     height: totalHeight,
     groupHeights,
-    groupTops
+    groupTops,
+    groupedItems
   }
 }
 
