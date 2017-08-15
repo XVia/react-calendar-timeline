@@ -528,7 +528,6 @@ export default class ReactCalendarTimeline extends Component {
     if (this.state.visibleTimeStart !== visibleTimeStart || this.state.visibleTimeEnd !== visibleTimeStart + zoom) {
       this.props.onTimeChange(visibleTimeStart, visibleTimeStart + zoom, this.updateScrollCanvas)
     }
-
   }
 
   componentWillReceiveProps (nextProps) {
@@ -1208,28 +1207,10 @@ export default class ReactCalendarTimeline extends Component {
       const { minUnit, timeSteps, height } = this.props
       const { visibleTimeEnd, visibleTimeStart, groupHeights } = this.state;
       let { timeframe } = this.state;
-      let format;
+      let format = 'MM-DD-YYYY'
 
-      // set the current timeframe and format
-      switch(timeframe) {
-          case 'hour':
-            timeframe = 'hour'
-            format = 'MM-DD-YYYY-LT'
-            break;
-          case 'day':
-          case 'week':
-            timeframe = 'day'
-            format = 'MM-DD-YYYY'
-            break;
-          case 'quarter':
-          case 'month':
-            timeframe = 'month'
-            format = 'MM-YYYY'
-            break
-          case 'year':
-            timeframe = 'year'
-            format = 'YYYY'
-            break
+      if (timeframe === 'hour') {
+          format = 'MM-DD-YYYY-LT'
       }
 
       // Init empty array of showMoreButtons
@@ -1244,11 +1225,12 @@ export default class ReactCalendarTimeline extends Component {
 
       const start = moment(visibleTimeStart)
       const end = moment(visibleTimeEnd)
-      const totalSlots = end.diff(start, timeframe)
+      let totalSlots = end.diff(start, timeframe)
+
 
       // Build out skeleton list
       for (let i = 0; i < totalSlots; i++) {
-        const slot = moment(start.add(1, timeframe)).format(format)
+        const slot = moment(start.add(1, timeframe)).startOf(timeframe).format(format)
         // Attach dates to the objectKeyedByGroup
         for (var group in objectKeyedByGroup) {
             objectKeyedByGroup[group][slot] = []
@@ -1259,8 +1241,18 @@ export default class ReactCalendarTimeline extends Component {
         items.forEach(item => {
             const start = moment(item.start_time)
             const end = moment(item.end_time)
+
             for (var date in objectKeyedByGroup[item.group]) {
+
                 if (moment(date).isBetween(start, end)) {
+                    objectKeyedByGroup[item.group][date].push(item)
+                } else if (moment(date).isSame(start) || moment(date).isSame(end)) {
+                    // Should handle case where the start or end time falls on
+                    // the start/end of that timeframe
+                    objectKeyedByGroup[item.group][date].push(item)
+                } else if ( timeframe === 'year' && (moment(date).years() === start.years() || moment(date).years() === end.years()) ) {
+                    // Should handle case where the start or end time falls on
+                    // the start/end of that timeframe
                     objectKeyedByGroup[item.group][date].push(item)
                 }
             }
@@ -1286,33 +1278,29 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups, timeframe) {
-      let format;
-      // set the current timeframe and format
-      switch(timeframe) {
-          case 'hour':
-            timeframe = 'hour'
-            format = 'MM-DD-YYYY-LT'
-            break;
-          case 'day':
-          case 'week':
-            timeframe = 'day'
-            format = 'MM-DD-YYYY'
-            break;
-          case 'quarter':
-          case 'month':
-            timeframe = 'month'
-            format = 'MM-YYYY'
-            break
-          case 'year':
-            timeframe = 'year'
-            format = 'YYYY'
-            break
+      let format = 'MM-DD-YYYY'
+
+      if (timeframe === 'hour') {
+          format = 'MM-DD-YYYY-LT'
       }
+
 
      // Set the left dimension on the buttons
      iterateTimes(canvasTimeStart, canvasTimeEnd, timeframe, timeSteps, (time, nextTime) => {
         showMoreButtons.forEach(button => {
             const ratio = canvasWidth / (canvasTimeEnd - canvasTimeStart)
+            if (timeframe === 'hour') {
+                time = time.startOf('hour')
+            }
+
+            if (timeframe === 'quarter') {
+                time = time.startOf('quarter')
+            }
+
+            if (timeframe === 'year') {
+                time = time.startOf('year')
+            }
+
             if (button.slot === time.format(format)) {
               button.left = Math.round((time.valueOf() - canvasTimeStart) * ratio, -2) + 6
             }
@@ -1346,9 +1334,32 @@ export default class ReactCalendarTimeline extends Component {
     this.props.onItemClick(item.id, evt)
   }
 
-  showMorePopup(showMoreButtonProps, dimensions) {
+  showMorePopup(showMoreButtonProps, dimensions, timeframe) {
     if (showMoreButtonProps && dimensions && dimensions.left && dimensions.top) {
       const { top, left, diffTop, diffLeft, width } = dimensions;
+      let format;
+
+      // set the current timeframe and format
+      switch(timeframe) {
+          case 'hour':
+            format = 'llll'
+            break;
+          case 'day':
+            format = 'dddd, LL'
+            break;
+          case 'week':
+            format ='[Week #]w, YYYY'
+            break;
+          case 'month':
+            format = 'MMMM, YYYY'
+            break
+          case 'quarter':
+            format ='[Q]Q, YYYY'
+            break;
+          case 'year':
+            format = 'YYYY'
+            break
+      }
 
       return (
           <WatchForClickOut onClickOut={this.onClickOut.bind(this)}>
@@ -1359,7 +1370,7 @@ export default class ReactCalendarTimeline extends Component {
                        position: 'fixed',
                        top: top + diffTop,
                        left: left - diffLeft + width + 4}}>
-                  <p className="mbs">{moment(showMoreButtonProps.date).format('dddd, LL')}</p>
+                  <p className="mbs">{moment(showMoreButtonProps.slot).startOf(timeframe).format(format)}</p>
                   <div>{showMoreButtonProps.items.map(item => {
                             return <a className="Diagram__menu-item" onClick={this.onShowMoreItemClick.bind(this, item)} key={item.id}>{this.props.itemRenderer({ item })}</a>
                         })}
@@ -1455,7 +1466,7 @@ export default class ReactCalendarTimeline extends Component {
                 headerLabelGroupHeight,
                 headerLabelHeight
               )}
-              {this.showMorePopup(showMore, showMorePosition)}
+              {this.showMorePopup(showMore, showMorePosition, timeframe)}
               {this.childrenWithProps(canvasTimeStart, canvasTimeEnd, canvasWidth, dimensionItems, groupHeights, groupTops, height, headerHeight, visibleTimeStart, visibleTimeEnd, minUnit, timeSteps)}
             </div>
           </div>

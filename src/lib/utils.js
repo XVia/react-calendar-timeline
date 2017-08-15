@@ -370,32 +370,33 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       // sort each item by id so they are in a consistent order
       items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
 
-      // NOTE: subtract height of show more if group has
-
       // adjusted height after accounting for itemVerticalMargin
-      let groupHeightAdjusted = groupHeight - (itemSpacing * (items.length + 1));
+      let groupHeightAdjusted = groupHeight - (itemSpacing * (3));
 
-      if (hasShowMore && hasShowMore.length) {
+      if (hasShowMore) {
           // if group has show more, then subtract
           groupHeightAdjusted -= 18;
       }
 
       // dynamic line height to fit items into the group height
-      let lineHeight = Math.floor(groupHeightAdjusted / items.length);
+      let lineHeight = Math.floor(groupHeightAdjusted / 3);
 
       let itemSpacingTotal = itemSpacing;
 
       // Loop through this set of collided items
       // and set the new dimensions for each one.
       // Bump each one down to the next lineHeight so they stack.
-      for (i = 0; i < items.length; i++) {
+      let max = hasShowMore ? 3 : items.length
+      for (i = 0; i < max; i++) {
         const item = items[i];
         // top offset relative to this group
         const topOffset = (lineHeight * i) + itemSpacingTotal;
 
-        // set the new dimensions to stack them
-        item.dimensions.top = totalHeight + topOffset;
-        item.dimensions.height = lineHeight;
+        if (item) {
+            // set the new dimensions to stack them
+            item.dimensions.top = totalHeight + topOffset;
+            item.dimensions.height = lineHeight;
+        }
 
         itemSpacingTotal += itemSpacing;
       }
