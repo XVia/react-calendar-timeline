@@ -450,8 +450,8 @@ export default class Item extends Component {
       left: `${dimensions.left}px`,
       top: `${dimensions.top}px`,
       width: `${dimensions.width}px`,
-      height: `${dimensions.height}px`,
-      lineHeight: `${dimensions.height}px`,
+      height: `${dimensions.height + 1}px`,
+      lineHeight: `${dimensions.height - 1}px`,
       display: dimensions.hide ? 'none' : 'inline-block'
     }
 
