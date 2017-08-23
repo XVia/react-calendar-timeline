@@ -203,6 +203,7 @@ export default class ReactCalendarTimeline extends Component {
       removeListener: PropTypes.func
     }),
 
+    scrollContainerClassname: PropTypes.string,
     children: PropTypes.node
   }
 
@@ -355,7 +356,11 @@ export default class ReactCalendarTimeline extends Component {
 
     this.lastTouchDistance = null
 
-    window.addEventListener('scroll', this.scrollEventListener)
+    if (this.props.scrollContainerClassname) {
+        document.querySelector(this.props.scrollContainerClassname).addEventListener('scroll', this.scrollEventListener);
+    } else {
+        window.addEventListener('scroll', this.scrollEventListener)
+    }
 
     this.refs.scrollComponent.addEventListener('touchstart', this.touchStart)
     this.refs.scrollComponent.addEventListener('touchmove', this.touchMove)
@@ -369,7 +374,11 @@ export default class ReactCalendarTimeline extends Component {
 
     windowResizeDetector.removeListener(this)
 
-    window.removeEventListener('scroll', this.scrollEventListener)
+    if (this.props.scrollContainerClassname) {
+        document.querySelector(this.props.scrollContainerClassname).removeEventListener('scroll', this.scrollEventListener);
+    } else {
+        window.removeEventListener('scroll', this.scrollEventListener)
+    }
 
     this.refs.scrollComponent.removeEventListener('touchstart', this.touchStart)
     this.refs.scrollComponent.removeEventListener('touchmove', this.touchMove)
