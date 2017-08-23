@@ -188,14 +188,13 @@ export default class Item extends Component {
           top: false,
           bottom: false
         },
-        enabled: this.props.selected && (this.canResizeLeft() || this.canResizeRight())
+        enabled: (this.canResizeLeft() || this.canResizeRight())
       })
       .draggable({
-        enabled: this.props.selected
+        enabled: true
       })
       .styleCursor(false)
       .on('dragstart', (e) => {
-        if (this.props.selected) {
           this.setState({
             dragging: true,
             dragStart: {x: e.pageX, y: e.pageY},
@@ -203,9 +202,6 @@ export default class Item extends Component {
             dragTime: this.itemTimeStart,
             dragGroupDelta: 0
           })
-        } else {
-          return false
-        }
       })
       .on('dragmove', (e) => {
         if (this.state.dragging) {
@@ -248,16 +244,12 @@ export default class Item extends Component {
         }
       })
       .on('resizestart', (e) => {
-        if (this.props.selected) {
           this.setState({
             resizing: true,
             resizeEdge: null, // we don't know yet
             resizeStart: e.pageX,
             resizeTime: 0
           })
-        } else {
-          return false
-        }
       })
       .on('resizemove', (e) => {
         if (this.state.resizing) {
@@ -338,14 +330,14 @@ export default class Item extends Component {
     this.cacheDataFromProps(nextProps)
 
     let { interactMounted } = this.state
-    const couldDrag = this.props.selected && this.canMove(this.props)
-    const couldResizeLeft = this.props.selected && this.canResizeLeft(this.props)
-    const couldResizeRight = this.props.selected && this.canResizeRight(this.props)
-    const willBeAbleToDrag = nextProps.selected && this.canMove(nextProps)
-    const willBeAbleToResizeLeft = nextProps.selected && this.canResizeLeft(nextProps)
-    const willBeAbleToResizeRight = nextProps.selected && this.canResizeRight(nextProps)
+    const couldDrag = this.canMove(this.props)
+    const couldResizeLeft = this.canResizeLeft(this.props)
+    const couldResizeRight = this.canResizeRight(this.props)
+    const willBeAbleToDrag = this.canMove(nextProps)
+    const willBeAbleToResizeLeft = this.canResizeLeft(nextProps)
+    const willBeAbleToResizeRight = this.canResizeRight(nextProps)
 
-    if (nextProps.selected && !interactMounted) {
+    if (!interactMounted) {
       this.mountInteract()
       interactMounted = true
     }
