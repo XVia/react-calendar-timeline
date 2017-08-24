@@ -323,13 +323,13 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
     // default height to groupHeight
     group.forEach((item, idx) => {
       item.dimensions.top = totalHeight + itemSpacing
-      item.dimensions.height = (groupHeight / 2)
+      item.dimensions.height = (groupHeight / 4)
       if (idx > 2) {
           item.dimensions.hide = true;
       }
     });
 
-    const hasShowMore = showMoreButtons.find(button => button.groupId === index);
+    const hasShowMore = showMoreButtons.find(button => button.groupId === index) !== undefined;
 
     let collidingItems = {};
 
@@ -379,7 +379,7 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       }
 
       // dynamic line height to fit items into the group height
-      let lineHeight = Math.floor(groupHeightAdjusted / 3);
+      let lineHeight = Math.floor(groupHeightAdjusted / 4);
 
       let itemSpacingTotal = itemSpacing;
 
