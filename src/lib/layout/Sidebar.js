@@ -67,10 +67,13 @@ export default class Sidebar extends Component {
       width: `${width}px`
     }
 
+    let stickyClass = '';
+
     if (fixedHeader === 'fixed') {
       headerStyle.position = 'fixed'
       groupsStyle.paddingTop = headerStyle.height
     } else if (fixedHeader === 'sticky') {
+      stickyClass = 'sticky';
       if (headerPosition === 'top') {
         // do nothing - keep at the top
       } else if (headerPosition === 'fixed') {
@@ -84,7 +87,7 @@ export default class Sidebar extends Component {
       }
     }
 
-    const header = <div ref='sidebarHeader' className='rct-sidebar-header' style={headerStyle}>
+    const header = <div ref='sidebarHeader' className={`rct-sidebar-header ${stickyClass}`} style={headerStyle}>
                      {this.props.children}
                    </div>
 
