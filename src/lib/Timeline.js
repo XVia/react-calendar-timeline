@@ -1363,7 +1363,7 @@ export default class ReactCalendarTimeline extends Component {
 
       return (
           <WatchForClickOut onClickOut={this.onClickOut.bind(this)}>
-              <div className="Diagram__menu"
+              <div className="Diagram__menu Diagram__menu--show-more"
                    style={{
                        zIndex: 110,
                        backgroundColor: 'white',
