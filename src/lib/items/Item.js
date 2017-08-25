@@ -132,7 +132,7 @@ export default class Item extends Component {
   }
 
   dragGroupDelta (e) {
-    const {groupTops, order, topOffset} = this.props
+    const {groupTops, order, topOffset, scrollOffset} = this.props
     if (this.state.dragging) {
       if (!this.props.canChangeGroup) {
         return 0
@@ -141,7 +141,7 @@ export default class Item extends Component {
 
       for (var key of Object.keys(groupTops)) {
         var item = groupTops[key]
-        if (e.pageY - topOffset > item) {
+        if (e.pageY - topOffset + scrollOffset > item) {
           groupDelta = parseInt(key, 10) - order
         } else {
           break
@@ -197,8 +197,8 @@ export default class Item extends Component {
       .on('dragstart', (e) => {
           this.setState({
             dragging: true,
-            dragStart: {x: e.pageX, y: e.pageY},
-            preDragPosition: {x: e.target.offsetLeft, y: e.target.offsetTop},
+            dragStart: {x: e.pageX, y: e.pageY + this.props.scrollOffset},
+            preDragPosition: {x: e.target.offsetLeft, y: e.target.offsetTop + this.props.scrollOffset},
             dragTime: this.itemTimeStart,
             dragGroupDelta: 0
           })

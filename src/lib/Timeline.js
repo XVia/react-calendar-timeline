@@ -327,7 +327,7 @@ export default class ReactCalendarTimeline extends Component {
 
       showMore: null,
 
-      oldScrollDiff: 0,
+      scrollOffset: 0,
 
       timeframe: props.timeframe ? props.timeframe : 'day'
     }
@@ -390,18 +390,19 @@ export default class ReactCalendarTimeline extends Component {
 
   // called on window scroll. it's job is to figure out if we should fix or float the header
   scrollEventListener = (e) => {
-    const { headerLabelGroupHeight, headerLabelHeight, stickyOffset } = this.props
+    const { headerLabelGroupHeight, headerLabelHeight, stickyOffset, scrollContainerClassname } = this.props
     const headerHeight = headerLabelGroupHeight + headerLabelHeight
 
     const rect = this.refs.container.getBoundingClientRect()
     const topOffset = stickyOffset ? stickyOffset : 0
+    const scrollOffset = scrollContainerClassname ? e.target.scrollTop : 0
 
     if (rect.top > topOffset) {
-      this.setState({ headerPosition: 'top' })
+      this.setState({ headerPosition: 'top', scrollOffset })
     } else if (rect.bottom < headerHeight) {
-      this.setState({ headerPosition: 'bottom' })
+      this.setState({ headerPosition: 'bottom', scrollOffset })
     } else {
-      this.setState({ headerPosition: 'fixed' })
+      this.setState({ headerPosition: 'fixed', scrollOffset })
     }
   }
 
@@ -924,9 +925,10 @@ export default class ReactCalendarTimeline extends Component {
     )
   }
 
-  items (canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, dimensionItems, groupHeights, groupTops, items) {
+  items (canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, dimensionItems, groupHeights, groupTops, items, scrollOffset) {
     return (
-      <Items canvasTimeStart={canvasTimeStart}
+      <Items scrollOffset={scrollOffset}
+             canvasTimeStart={canvasTimeStart}
              canvasTimeEnd={canvasTimeEnd}
              canvasWidth={canvasWidth}
              lineCount={_length(this.props.groups)}
@@ -1327,7 +1329,7 @@ export default class ReactCalendarTimeline extends Component {
 
   onClickOut(evt) {
      const { diffLeft } = this.state.showMorePosition
-     this.setState({ showMore: null, oldScrollDiff: diffLeft })
+     this.setState({ showMore: null })
   }
 
   onShowMoreItemClick(item, evt) {
@@ -1390,7 +1392,7 @@ export default class ReactCalendarTimeline extends Component {
 
   render () {
     const { items, groups, headerLabelGroupHeight, headerLabelHeight, sidebarWidth, rightSidebarWidth, timeSteps, showCursorLine } = this.props
-    const { draggingItem, resizingItem, isDragging, width, visibleTimeStart, visibleTimeEnd, canvasTimeStart, mouseOverCanvas, cursorTime, showMore, showMorePosition, timeframe } = this.state
+    const { draggingItem, resizingItem, isDragging, width, visibleTimeStart, visibleTimeEnd, canvasTimeStart, mouseOverCanvas, cursorTime, showMore, showMorePosition, timeframe, scrollOffset } = this.state
     let { dimensionItems, height, groupHeights, groupTops, groupedItems, showMoreButtons } = this.state
 
     const zoom = visibleTimeEnd - visibleTimeStart
@@ -1446,7 +1448,7 @@ export default class ReactCalendarTimeline extends Component {
                  onMouseMove={ this.handleCanvasMouseMove }
                  onContextMenu={ this.handleCanvasContextMenu }
             >
-              {this.items(canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, dimensionItems, groupHeights, groupTops, items)}
+              {this.items(canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, dimensionItems, groupHeights, groupTops, items, scrollOffset)}
               {this.verticalLines(canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, timeSteps, height, headerHeight)}
               {this.horizontalLines(canvasWidth, groupHeights, headerHeight)}
               {this.todayLine(canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, height, headerHeight)}

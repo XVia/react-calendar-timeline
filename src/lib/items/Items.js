@@ -46,7 +46,9 @@ export default class Items extends Component {
     onItemContextMenu: PropTypes.func,
 
     itemRenderer: PropTypes.func,
-    selected: PropTypes.array
+    selected: PropTypes.array,
+
+    scrollOffset: PropTypes.number
   }
 
   static defaultProps = {
@@ -103,17 +105,17 @@ export default class Items extends Component {
   }
 
   render () {
-    const { canvasTimeStart, canvasTimeEnd, dimensionItems } = this.props
+    const { canvasTimeStart, canvasTimeEnd, dimensionItems, scrollOffset } = this.props
     const { itemIdKey, itemGroupKey } = this.props.keys
 
     const groupOrders = this.getGroupOrders()
     const visibleItems = this.getVisibleItems(canvasTimeStart, canvasTimeEnd, groupOrders)
     const sortedDimensionItems = keyBy(dimensionItems, 'id')
-
     return (
       <div className='rct-items'>
         {visibleItems.filter(item => sortedDimensionItems[_get(item, itemIdKey)])
-                     .map(item => <Item key={_get(item, itemIdKey)}
+                     .map(item => <Item scrollOffset={scrollOffset}
+                                        key={_get(item, itemIdKey)}
                                         item={item}
                                         keys={this.props.keys}
                                         order={groupOrders[_get(item, itemGroupKey)]}
