@@ -260,8 +260,6 @@ export default class Item extends Component {
             this.setState({ resizeEdge })
           }
           const time = resizeEdge === 'left' ? this.itemTimeStart : this.itemTimeEnd
-          console.log(moment(time).format())
-          console.log(moment(this.resizeTimeDelta(e, resizeEdge)).format())
           let resizeTime = this.resizeTimeSnap(time + this.resizeTimeDelta(e, resizeEdge))
 
           if (this.props.moveResizeValidator) {
