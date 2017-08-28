@@ -302,7 +302,7 @@ function horizontalCollision(a, b) {
   return !( aRight < b.left || a.left > bRight );
 }
 
-export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, showMoreButtons) {
+export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, showMoreButtons, itemStackLength) {
   const itemSpacing = 3;
   let i;
   let totalHeight = headerHeight;
@@ -323,8 +323,8 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
     // default height to groupHeight
     group.forEach((item, idx) => {
       item.dimensions.top = totalHeight + itemSpacing
-      item.dimensions.height = (groupHeight / 4)
-      if (idx > 2) {
+      item.dimensions.height = (groupHeight / itemStackLength.length + 1)
+      if (idx > (itemStackLength - 1)) {
           item.dimensions.hide = true;
       }
     });
@@ -379,14 +379,14 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       }
 
       // dynamic line height to fit items into the group height
-      let lineHeight = Math.floor(groupHeightAdjusted / 4);
+      let lineHeight = Math.floor(groupHeightAdjusted / (itemStackLength + 1));
 
       let itemSpacingTotal = itemSpacing;
 
       // Loop through this set of collided items
       // and set the new dimensions for each one.
       // Bump each one down to the next lineHeight so they stack.
-      let max = hasShowMore ? 2 : items.length
+      let max = hasShowMore ? (itemStackLength - 1) : items.length
       for (i = 0; i < max; i++) {
         const item = items[i];
         // top offset relative to this group

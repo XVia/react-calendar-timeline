@@ -204,6 +204,7 @@ export default class ReactCalendarTimeline extends Component {
     }),
 
     scrollContainerClassname: PropTypes.string,
+    itemStackLength: PropTypes.number,
     children: PropTypes.node
   }
 
@@ -230,6 +231,7 @@ export default class ReactCalendarTimeline extends Component {
     useResizeHandle: false,
     canSelect: true,
 
+    itemStackLength: 3,
     stackItems: false,
     groupHeight: false,
 
@@ -1046,7 +1048,7 @@ export default class ReactCalendarTimeline extends Component {
       }
     }
 
-    const { keys, dragSnap, lineHeight, headerLabelGroupHeight, headerLabelHeight, stackItems, fullUpdate, itemHeightRatio, groupHeight } = this.props
+    const { keys, dragSnap, lineHeight, headerLabelGroupHeight, headerLabelHeight, stackItems, fullUpdate, itemHeightRatio, groupHeight, itemStackLength } = this.props
     const { draggingItem, dragTime, resizingItem, resizingEdge, resizeTime, newGroupOrder } = this.state
     const zoom = visibleTimeEnd - visibleTimeStart
     const canvasTimeEnd = canvasTimeStart + zoom * 3
@@ -1111,7 +1113,8 @@ export default class ReactCalendarTimeline extends Component {
       headerHeight,
       false,
       groupHeight,
-      showMoreButtons
+      showMoreButtons,
+      itemStackLength
     )
 
     return { dimensionItems, height, groupHeights, groupTops, groupedItems, showMoreButtons }
@@ -1206,7 +1209,7 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   getShowMorebuttons(items, groups) {
-      const { minUnit, timeSteps, height } = this.props
+      const { minUnit, timeSteps, height, itemStackLength } = this.props
       const { visibleTimeEnd, visibleTimeStart, groupHeights } = this.state;
       let { timeframe } = this.state;
       let format = 'MM-DD-YYYY'
@@ -1263,7 +1266,7 @@ export default class ReactCalendarTimeline extends Component {
         // See if we need a show more button based on some length (3)
        for (var group in objectKeyedByGroup) {
            for (var slot in objectKeyedByGroup[group]) {
-               if (objectKeyedByGroup[group][slot].length > 3) {
+               if (objectKeyedByGroup[group][slot].length > itemStackLength) {
                    const showMoreButtonId = `${group}-${slot}`
                    showMoreButtons.push({
                        id: showMoreButtonId,
