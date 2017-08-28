@@ -125,7 +125,7 @@ export default class Item extends Component {
       const deltaX = e.pageX - this.state.dragStart.x
       const timeDelta = deltaX * this.coordinateToTimeRatio()
 
-      return this.dragTimeSnap(startTime + timeDelta, true)
+      return this.dragTimeSnap(startTime + timeDelta, false)
     } else {
       return startTime
     }
@@ -260,7 +260,8 @@ export default class Item extends Component {
             this.setState({ resizeEdge })
           }
           const time = resizeEdge === 'left' ? this.itemTimeStart : this.itemTimeEnd
-
+          console.log(moment(time).format())
+          console.log(moment(this.resizeTimeDelta(e, resizeEdge)).format())
           let resizeTime = this.resizeTimeSnap(time + this.resizeTimeDelta(e, resizeEdge))
 
           if (this.props.moveResizeValidator) {
