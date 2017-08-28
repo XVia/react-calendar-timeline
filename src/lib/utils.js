@@ -386,7 +386,7 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       // Loop through this set of collided items
       // and set the new dimensions for each one.
       // Bump each one down to the next lineHeight so they stack.
-      let max = hasShowMore ? 3 : items.length
+      let max = hasShowMore ? 2 : items.length
       for (i = 0; i < max; i++) {
         const item = items[i];
         // top offset relative to this group
