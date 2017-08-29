@@ -33,10 +33,12 @@ export default class Item extends Component {
     // onResized: React.PropTypes.func,
     // onContextMenu: React.PropTypes.func,
     // itemRenderer: React.PropTypes.func
+    // style: React.PropTypes.func
   }
 
   static defaultProps = {
-    selected: false
+    selected: false,
+    style: {}
   }
 
   constructor (props) {
@@ -427,6 +429,19 @@ export default class Item extends Component {
       return null
     }
 
+    let { style } = this.props;
+
+    if (style) {
+        if (style.backgroundColor) {
+            style.borderColor = style.backgroundColor[0] !== '#' ?  `#${style.backgroundColor}` : style.backgroundColor;
+            style.backgroundColor = style.backgroundColor[0] !== '#' ?  `#${style.backgroundColor}` : style.backgroundColor;
+        }
+        if (style.textColor) {
+            style.color = style.textColor[0] !== '#' ?  `#${style.textColor}` : style.textColor;
+            delete style.textColor;
+        }
+    }
+
     const classNames = 'rct-item' +
                        (this.props.selected ? ' selected' : '') +
                        (this.canMove(this.props) ? ' can-move' : '') +
@@ -437,14 +452,14 @@ export default class Item extends Component {
                        (dimensions.clippedLeft ? ' clipped-left' : '') +
                        (dimensions.clippedRight ? ' clipped-right' : '')
 
-    const style = {
+    const allStyles = Object.assign({}, {
       left: `${dimensions.left}px`,
       top: `${dimensions.top}px`,
       width: `${dimensions.width}px`,
       height: `${dimensions.height + 1}px`,
       lineHeight: `${dimensions.height - 1}px`,
       display: dimensions.hide ? 'none' : 'inline-block'
-    }
+    }, style);
 
     return (
       <div {...this.props.item.itemProps}
@@ -458,7 +473,7 @@ export default class Item extends Component {
            onTouchEnd={this.onTouchEnd}
            onDoubleClick={this.handleDoubleClick}
            onContextMenu={this.handleContextMenu}
-           style={style}>
+           style={allStyles}>
         {this.props.useResizeHandle ? <div ref='dragLeft' className='rct-drag-left'></div> : ''}
         <div className='rct-item-overflow'>
           <div className='rct-item-content'>

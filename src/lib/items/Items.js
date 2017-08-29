@@ -48,7 +48,8 @@ export default class Items extends Component {
     itemRenderer: PropTypes.func,
     selected: PropTypes.array,
 
-    scrollOffset: PropTypes.number
+    scrollOffset: PropTypes.number,
+    styles: PropTypes.object
   }
 
   static defaultProps = {
@@ -105,45 +106,50 @@ export default class Items extends Component {
   }
 
   render () {
-    const { canvasTimeStart, canvasTimeEnd, dimensionItems, scrollOffset } = this.props
+    const { canvasTimeStart, canvasTimeEnd, dimensionItems, scrollOffset, itemStyles } = this.props
     const { itemIdKey, itemGroupKey } = this.props.keys
-
     const groupOrders = this.getGroupOrders()
     const visibleItems = this.getVisibleItems(canvasTimeStart, canvasTimeEnd, groupOrders)
     const sortedDimensionItems = keyBy(dimensionItems, 'id')
     return (
       <div className='rct-items'>
         {visibleItems.filter(item => sortedDimensionItems[_get(item, itemIdKey)])
-                     .map(item => <Item scrollOffset={scrollOffset}
-                                        key={_get(item, itemIdKey)}
-                                        item={item}
-                                        keys={this.props.keys}
-                                        order={groupOrders[_get(item, itemGroupKey)]}
-                                        dimensions={sortedDimensionItems[_get(item, itemIdKey)].dimensions}
-                                        selected={this.isSelected(item, itemIdKey)}
-                                        canChangeGroup={_get(item, 'canChangeGroup') !== undefined ? _get(item, 'canChangeGroup') : this.props.canChangeGroup}
-                                        canMove={_get(item, 'canMove') !== undefined ? _get(item, 'canMove') : this.props.canMove}
-                                        canResizeLeft={canResizeLeft(item, this.props.canResize)}
-                                        canResizeRight={canResizeRight(item, this.props.canResize)}
-                                        canSelect={_get(item, 'canSelect') !== undefined ? _get(item, 'canSelect') : this.props.canSelect}
-                                        useResizeHandle={this.props.useResizeHandle}
-                                        topOffset={this.props.topOffset}
-                                        groupHeights={this.props.groupHeights}
-                                        groupTops={this.props.groupTops}
-                                        canvasTimeStart={this.props.canvasTimeStart}
-                                        canvasTimeEnd={this.props.canvasTimeEnd}
-                                        canvasWidth={this.props.canvasWidth}
-                                        dragSnap={this.props.dragSnap}
-                                        minResizeWidth={this.props.minResizeWidth}
-                                        onResizing={this.props.itemResizing}
-                                        onResized={this.props.itemResized}
-                                        moveResizeValidator={this.props.moveResizeValidator}
-                                        onDrag={this.props.itemDrag}
-                                        onDrop={this.props.itemDrop}
-                                        onItemDoubleClick={this.props.onItemDoubleClick}
-                                        onContextMenu={this.props.onItemContextMenu}
-                                        onSelect={this.props.itemSelect}
-                                        itemRenderer={this.props.itemRenderer} />)}
+                     .map(item => {
+                       const itemStyle = (itemStyles && itemStyles[item.id.toString()]) ? itemStyles[item.id.toString()].styles : {};
+                       return (
+                           <Item  style={itemStyle}
+                                  scrollOffset={scrollOffset}
+                                  key={_get(item, itemIdKey)}
+                                  item={item}
+                                  keys={this.props.keys}
+                                  order={groupOrders[_get(item, itemGroupKey)]}
+                                  dimensions={sortedDimensionItems[_get(item, itemIdKey)].dimensions}
+                                  selected={this.isSelected(item, itemIdKey)}
+                                  canChangeGroup={_get(item, 'canChangeGroup') !== undefined ? _get(item, 'canChangeGroup') : this.props.canChangeGroup}
+                                  canMove={_get(item, 'canMove') !== undefined ? _get(item, 'canMove') : this.props.canMove}
+                                  canResizeLeft={canResizeLeft(item, this.props.canResize)}
+                                  canResizeRight={canResizeRight(item, this.props.canResize)}
+                                  canSelect={_get(item, 'canSelect') !== undefined ? _get(item, 'canSelect') : this.props.canSelect}
+                                  useResizeHandle={this.props.useResizeHandle}
+                                  topOffset={this.props.topOffset}
+                                  groupHeights={this.props.groupHeights}
+                                  groupTops={this.props.groupTops}
+                                  canvasTimeStart={this.props.canvasTimeStart}
+                                  canvasTimeEnd={this.props.canvasTimeEnd}
+                                  canvasWidth={this.props.canvasWidth}
+                                  dragSnap={this.props.dragSnap}
+                                  minResizeWidth={this.props.minResizeWidth}
+                                  onResizing={this.props.itemResizing}
+                                  onResized={this.props.itemResized}
+                                  moveResizeValidator={this.props.moveResizeValidator}
+                                  onDrag={this.props.itemDrag}
+                                  onDrop={this.props.itemDrop}
+                                  onItemDoubleClick={this.props.onItemDoubleClick}
+                                  onContextMenu={this.props.onItemContextMenu}
+                                  onSelect={this.props.itemSelect}
+                                  itemRenderer={this.props.itemRenderer} />
+                       );
+                     })}
       </div>
     )
   }

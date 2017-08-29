@@ -205,6 +205,7 @@ export default class ReactCalendarTimeline extends Component {
 
     scrollContainerClassname: PropTypes.string,
     itemStackLength: PropTypes.number,
+    itemStyles: PropTypes.object,
     children: PropTypes.node
   }
 
@@ -927,9 +928,10 @@ export default class ReactCalendarTimeline extends Component {
     )
   }
 
-  items (canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, dimensionItems, groupHeights, groupTops, items, scrollOffset) {
+  items (canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, dimensionItems, groupHeights, groupTops, items, scrollOffset, itemStyles) {
     return (
-      <Items scrollOffset={scrollOffset}
+      <Items itemStyles={itemStyles}
+             scrollOffset={scrollOffset}
              canvasTimeStart={canvasTimeStart}
              canvasTimeEnd={canvasTimeEnd}
              canvasWidth={canvasWidth}
@@ -1394,7 +1396,7 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   render () {
-    const { items, groups, headerLabelGroupHeight, headerLabelHeight, sidebarWidth, rightSidebarWidth, timeSteps, showCursorLine } = this.props
+    const { items, groups, headerLabelGroupHeight, headerLabelHeight, sidebarWidth, rightSidebarWidth, timeSteps, showCursorLine, itemStyles } = this.props
     const { draggingItem, resizingItem, isDragging, width, visibleTimeStart, visibleTimeEnd, canvasTimeStart, mouseOverCanvas, cursorTime, showMore, showMorePosition, timeframe, scrollOffset } = this.state
     let { dimensionItems, height, groupHeights, groupTops, groupedItems, showMoreButtons } = this.state
 
@@ -1451,7 +1453,7 @@ export default class ReactCalendarTimeline extends Component {
                  onMouseMove={ this.handleCanvasMouseMove }
                  onContextMenu={ this.handleCanvasContextMenu }
             >
-              {this.items(canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, dimensionItems, groupHeights, groupTops, items, scrollOffset)}
+              {this.items(canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, dimensionItems, groupHeights, groupTops, items, scrollOffset, itemStyles)}
               {this.verticalLines(canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, timeSteps, height, headerHeight)}
               {this.horizontalLines(canvasWidth, groupHeights, headerHeight)}
               {this.todayLine(canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, height, headerHeight)}
