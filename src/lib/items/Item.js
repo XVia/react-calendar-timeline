@@ -181,6 +181,7 @@ export default class Item extends Component {
   mountInteract () {
     const leftResize = this.props.useResizeHandle ? this.refs.dragLeft : true
     const rightResize = this.props.useResizeHandle ? this.refs.dragRight : true
+    const { canMove } = this.props;
 
     interact(this.refs.item)
       .resizable({
@@ -193,7 +194,7 @@ export default class Item extends Component {
         enabled: (this.canResizeLeft() || this.canResizeRight())
       })
       .draggable({
-        enabled: true
+        enabled: canMove ? canMove : false
       })
       .styleCursor(false)
       .on('dragstart', (e) => {
