@@ -302,7 +302,7 @@ function horizontalCollision(a, b) {
   return !( aRight < b.left || a.left > bRight );
 }
 
-export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, showMoreButtons, itemStackLength) {
+export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, showMoreButtons) {
   const itemSpacing = 3;
   let i;
   let totalHeight = headerHeight;
@@ -316,20 +316,12 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
     // calculate new, non-overlapping positions
     groupTops.push(totalHeight);
 
-    // Reverse the group so things show up right
-    group = group.reverse();
-
     // first set them all to the same top position
     // default height to groupHeight
     group.forEach((item, idx) => {
       item.dimensions.top = totalHeight + itemSpacing
-      item.dimensions.height = (groupHeight / itemStackLength.length + 1)
-      if (idx > (itemStackLength - 1)) {
-          item.dimensions.hide = true;
-      }
+      item.dimensions.height = (groupHeight / 2)
     });
-
-    const hasShowMore = showMoreButtons.find(button => button.groupId === index) !== undefined;
 
     let collidingItems = {};
 
@@ -367,27 +359,26 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
     list.forEach(itemId => {
       let items = collidingItems[itemId];
 
+      // See if we have a show more button in the column to hide the record below
+      const hasShowMore = showMoreButtons.find(button => button.groupId === parseInt(itemId));
+
       // sort each item by id so they are in a consistent order
       items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
 
       // adjusted height after accounting for itemVerticalMargin
       let groupHeightAdjusted = groupHeight - (itemSpacing * (3));
 
-      if (hasShowMore) {
-          // if group has show more, then subtract
-          groupHeightAdjusted -= 18;
-      }
-
       // dynamic line height to fit items into the group height
-      let lineHeight = Math.floor(groupHeightAdjusted / (itemStackLength + 1));
+      let divideBy = items.length > 3 ? 4 : items.length;
+
+      let lineHeight = Math.floor(groupHeightAdjusted / divideBy);
 
       let itemSpacingTotal = itemSpacing;
 
       // Loop through this set of collided items
       // and set the new dimensions for each one.
       // Bump each one down to the next lineHeight so they stack.
-      let max = hasShowMore ? (itemStackLength - 1) : items.length
-      for (i = 0; i < max; i++) {
+      for (i = 0; i < items.length; i++) {
         const item = items[i];
         // top offset relative to this group
         const topOffset = (lineHeight * i) + itemSpacingTotal;
@@ -396,6 +387,11 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
             // set the new dimensions to stack them
             item.dimensions.top = totalHeight + topOffset;
             item.dimensions.height = lineHeight;
+        }
+
+        // Hide if greater than 3 for the date and there is a show more button
+        if (i >= 3 && hasShowMore) {
+            item.dimensions.hide = true;
         }
 
         itemSpacingTotal += itemSpacing;
