@@ -1291,7 +1291,6 @@ export default class ReactCalendarTimeline extends Component {
           format = 'MM-DD-YYYY-LT'
       }
 
-
      // Set the left dimension on the buttons
      iterateTimes(canvasTimeStart, canvasTimeEnd, timeframe, timeSteps, (time, nextTime) => {
         showMoreButtons.forEach(button => {
@@ -1316,7 +1315,8 @@ export default class ReactCalendarTimeline extends Component {
 
       // Set the top dimension on the buttons
       showMoreButtons.forEach(button => {
-        button.top = headerHeight + this.props.groupHeight * (groups.length - (button.groupId - 1)) - 18
+        let index = groups.findIndex(group => group.id === button.groupId);
+        button.top = headerHeight + this.props.groupHeight * (index + 1) - 18
       })
 
       return showMoreButtons

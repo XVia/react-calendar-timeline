@@ -359,8 +359,15 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
     list.forEach(itemId => {
       let items = collidingItems[itemId];
 
+      let groupId = null;
+      for (let key in groupOrders) {
+        if (groupOrders[key] == index) {
+            groupId = key;
+        }
+      }
+
       // See if we have a show more button in the column to hide the record below
-      const hasShowMore = showMoreButtons.find(button => button.groupId === parseInt(itemId));
+      const hasShowMore = showMoreButtons.find(button => button.groupId === parseInt(groupId));
 
       // sort each item by id so they are in a consistent order
       items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
@@ -390,7 +397,7 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
         }
 
         // Hide if greater than 3 for the date and there is a show more button
-        if (i >= 3 && hasShowMore) {
+        if (i > 2 && hasShowMore) {
             item.dimensions.hide = true;
         }
 
