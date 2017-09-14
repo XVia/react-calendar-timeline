@@ -1250,10 +1250,9 @@ export default class ReactCalendarTimeline extends Component {
             const end = moment(item.end_time)
 
             for (var date in objectKeyedByGroup[item.group]) {
-
-                if (moment(date).isBetween(start, end)) {
+                if (moment(date).isBetween(start, end) ) {
                     objectKeyedByGroup[item.group][date].push(item)
-                } else if (moment(date).isSame(start) || moment(date).isSame(end)) {
+                } else if ((timeframe === 'hour' || timeframe === 'day') && (moment(date).isSame(start) || moment(date).isSame(end))) {
                     // Should handle case where the start or end time falls on
                     // the start/end of that timeframe
                     objectKeyedByGroup[item.group][date].push(item)
@@ -1261,9 +1260,17 @@ export default class ReactCalendarTimeline extends Component {
                     // Should handle case where the start or end time falls on
                     // the start/end of that timeframe
                     objectKeyedByGroup[item.group][date].push(item)
+                } else if ( timeframe === 'month' && ( (moment(date).months() === start.months() && moment(date).years() === start.years()) || (moment(date).months() === end.months() && moment(date).years() === end.years()) )) {
+                    objectKeyedByGroup[item.group][date].push(item)
+                } else if ( timeframe === 'week' && ((moment(date).weeks() === start.weeks() && moment(date).years() === start.years()) || (moment(date).weeks() === end.weeks() && moment(date).years() === end.years())) ) {
+                    objectKeyedByGroup[item.group][date].push(item);
+                } else if ( timeframe === 'quarter' && ((moment(date).quarter() === start.quarter() && moment(date).years() === start.years()) || (moment(date).quarter() === end.quarter() && moment(date).years() === end.years()) )) {
+                    objectKeyedByGroup[item.group][date].push(item);
                 }
             }
         });
+
+        console.log(objectKeyedByGroup);
 
         // See if we need a show more button based on some length (3)
        for (var group in objectKeyedByGroup) {
@@ -1431,6 +1438,8 @@ export default class ReactCalendarTimeline extends Component {
       width: `${canvasWidth}px`,
       height: `${height}px`
     }
+
+    console.log('rerender');
 
     return (
       <div style={this.props.style} ref='container' className='react-calendar-timeline'>
