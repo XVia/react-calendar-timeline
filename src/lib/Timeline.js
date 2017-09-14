@@ -1439,8 +1439,6 @@ export default class ReactCalendarTimeline extends Component {
       height: `${height}px`
     }
 
-    console.log('rerender');
-
     return (
       <div style={this.props.style} ref='container' className='react-calendar-timeline'>
         <div style={outerComponentStyle} className='rct-outer'>
