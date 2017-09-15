@@ -1270,8 +1270,6 @@ export default class ReactCalendarTimeline extends Component {
             }
         });
 
-        console.log(objectKeyedByGroup);
-
         // See if we need a show more button based on some length (3)
        for (var group in objectKeyedByGroup) {
            for (var slot in objectKeyedByGroup[group]) {
