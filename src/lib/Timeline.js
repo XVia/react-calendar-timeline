@@ -486,23 +486,25 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   resize = (props = this.props) => {
-    const { width: containerWidth, top: containerTop } = this.refs.container.getBoundingClientRect()
-    let width = containerWidth - props.sidebarWidth - props.rightSidebarWidth
+      if (this.refs.container) {
+          const { width: containerWidth, top: containerTop } = this.refs.container.getBoundingClientRect()
+          let width = containerWidth - props.sidebarWidth - props.rightSidebarWidth
 
-    const {
-      dimensionItems, height, groupHeights, groupTops, groupedItems
-    } = this.stackItems(props.items, props.groups, this.state.canvasTimeStart, this.state.visibleTimeStart, this.state.visibleTimeEnd, width)
+          const {
+            dimensionItems, height, groupHeights, groupTops, groupedItems
+          } = this.stackItems(props.items, props.groups, this.state.canvasTimeStart, this.state.visibleTimeStart, this.state.visibleTimeEnd, width)
 
-    this.setState({
-      width: width,
-      topOffset: containerTop + window.pageYOffset,
-      dimensionItems: dimensionItems,
-      height: height,
-      groupHeights: groupHeights,
-      groupTops: groupTops,
-      groupedItems: groupedItems
-    })
-    this.refs.scrollComponent.scrollLeft = width
+          this.setState({
+            width: width,
+            topOffset: containerTop + window.pageYOffset,
+            dimensionItems: dimensionItems,
+            height: height,
+            groupHeights: groupHeights,
+            groupTops: groupTops,
+            groupedItems: groupedItems
+          })
+          this.refs.scrollComponent.scrollLeft = width
+      }
   }
 
   onScroll = () => {
