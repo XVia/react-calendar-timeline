@@ -1413,14 +1413,13 @@ export default class ReactCalendarTimeline extends Component {
     const minUnit = getMinUnit(zoom, width, timeSteps)
     const headerHeight = headerLabelGroupHeight + headerLabelHeight
 
-    if (draggingItem || resizingItem) {
-      const stackResults = this.stackItems(items, groups, canvasTimeStart, visibleTimeStart, visibleTimeEnd, width)
-      dimensionItems = stackResults.dimensionItems
-      height = stackResults.height
-      groupHeights = stackResults.groupHeights
-      groupTops = stackResults.groupTops
-      groupedItems = stackResults.groupedItems
-    }
+    const stackResults = this.stackItems(items, groups, canvasTimeStart, visibleTimeStart, visibleTimeEnd, width, showMoreButtons)
+    dimensionItems = stackResults.dimensionItems
+    height = stackResults.height
+    groupHeights = stackResults.groupHeights
+    groupTops = stackResults.groupTops
+    groupedItems = stackResults.groupedItems
+    showMoreButtons = stackResults.showMoreButtons
 
     showMoreButtons = this.getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups, timeframe);
 
