@@ -310,18 +310,26 @@ export default class Item extends Component {
 
   canResizeLeft (props = this.props) {
     if (!props.canResizeLeft || props.dimensions.clippedLeft) {
+      console.log('can resize left reeturning early');
       return false
     }
-    let width = parseInt(props.dimensions.width, 10)
-    return width >= props.minResizeWidth
+
+    // let width = parseInt(props.dimensions.width, 10)
+    // return width >= props.minResizeWidth
+
+    return true;
   }
 
   canResizeRight (props = this.props) {
     if (!props.canResizeRight || props.dimensions.clippedRight) {
+      console.log('can resize right reeturning early');
       return false
     }
-    let width = parseInt(props.dimensions.width, 10)
-    return width >= props.minResizeWidth
+
+    // let width = parseInt(props.dimensions.width, 10)
+    // return width >= props.minResizeWidth
+
+    return true;
   }
 
   canMove (props = this.props) {
