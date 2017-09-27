@@ -310,7 +310,6 @@ export default class Item extends Component {
 
   canResizeLeft (props = this.props) {
     if (!props.canResizeLeft || props.dimensions.clippedLeft) {
-      console.log('can resize left reeturning early');
       return false
     }
 
@@ -322,7 +321,6 @@ export default class Item extends Component {
 
   canResizeRight (props = this.props) {
     if (!props.canResizeRight || props.dimensions.clippedRight) {
-      console.log('can resize right reeturning early');
       return false
     }
 
