@@ -774,6 +774,7 @@ export default class ReactCalendarTimeline extends Component {
     const keys = this.props.keys
 
     this.setState({
+      showMore: null,
       draggingItem: item,
       dragTime: dragTime,
       newGroupOrder: newGroupOrder,
@@ -790,6 +791,7 @@ export default class ReactCalendarTimeline extends Component {
 
   resizingItem = (item, resizeTime, edge) => {
     this.setState({
+      showMore: null,
       resizingItem: item,
       resizingEdge: edge,
       resizeTime: resizeTime
