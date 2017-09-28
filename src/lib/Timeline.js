@@ -1096,6 +1096,8 @@ export default class ReactCalendarTimeline extends Component {
 
         memo.push({
           id: itemId,
+          start_time: _get(item, keys.itemTimeStartKey),
+          end_time: _get(item, keys.itemTimeEndKey),
           dimensions: dimension
         })
       }
@@ -1336,7 +1338,17 @@ export default class ReactCalendarTimeline extends Component {
   showMoreButtons(buttons) {
     if (buttons.length) {
         return buttons.map(button => {
-            return <ShowMoreButton button={button} key={button.id} onClick={this.handleShowMoreClick.bind(this)}/>;
+            const itemsHidden = this.state.dimensionItems.filter(dItem => {
+                if (dItem.dimensions.hide) {
+                    if (moment(button.slot).isBetween(dItem.start_time) || button.slot === moment(dItem.start_time).format('MM-DD-YYYY') || button.slot === moment(dItem.end_time).format('MM-DD-YYYY')) {
+                        return true;
+                    }
+                } else {
+                    return false;
+                }
+            });
+
+            return <ShowMoreButton moreLength={itemsHidden.length} button={button} key={button.id} onClick={this.handleShowMoreClick.bind(this)}/>;
         });
     } else {
       return null

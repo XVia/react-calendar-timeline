@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 export default class showMoreButton extends Component {
@@ -9,12 +8,12 @@ export default class showMoreButton extends Component {
 
   render () {
 
-    const { button } = this.props
+    const { button, moreLength } = this.props
 
     return (
       <div className='rct-show-more-button'
            style={{ position: 'absolute', top: button.top, left: button.left, zIndex: 50, userSelect: 'none' }}>
-        <a onClick={this.handleClick.bind(this)}>{button.items.length - 3}+ more </a>
+        <a onClick={this.handleClick.bind(this)}>{moreLength}+ more </a>
       </div>
     )
   }

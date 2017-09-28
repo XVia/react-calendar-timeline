@@ -371,7 +371,7 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       }
 
       // See if we have a show more button in the column to hide the record below
-      const hasShowMore = showMoreButtons.find(button => button.groupId === parseInt(groupId));
+      const hasShowMore = showMoreButtons.filter(button => button.groupId === parseInt(groupId));
 
       // sort each item by id so they are in a consistent order
       items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
@@ -401,8 +401,25 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
         }
 
         // Hide if greater than 3 for the date and there is a show more button
-        if (i > 2 && hasShowMore) {
-            item.dimensions.hide = true;
+        if (i > 2 && hasShowMore && hasShowMore.length) {
+            hasShowMore.forEach(showMore => {
+                showMore.items.some(showMoreItem => {
+                    if (showMoreItem.id === item.id) {
+                        item.dimensions.hide = true;
+                        return true;
+                    }
+                });
+            });
+        }
+
+        // Do some more fancy stuffs with collision
+        if (i >= 4 && hasShowMore && !item.dimensions.hide) {
+            collidingItems[itemId].some(collidingItem => {
+                if (!horizontalCollision(collidingItem.dimensions, item.dimensions)) {
+                    item.dimensions.top = collidingItem.dimensions.top;
+                    return true;
+                }
+            });
         }
 
         itemSpacingTotal += itemSpacing;
