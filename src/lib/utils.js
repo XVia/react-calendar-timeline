@@ -297,6 +297,10 @@ export function nostack (items, groupOrders, lineHeight, headerHeight, force) {
 }
 
 function horizontalCollision(a, b) {
+  // NOTE: 20px is our mininum width for timeline events - check timelineView.scss
+  a.width = a.width < 20 ? 20 : a.width;
+  b.width = b.width < 20 ? 20 : b.width;
+
   const aRight = a.left + a.width;
   const bRight = b.left + b.width;
   return !( aRight < b.left || a.left > bRight );

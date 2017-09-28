@@ -1260,6 +1260,8 @@ export default class ReactCalendarTimeline extends Component {
                     // Should handle case where the start or end time falls on
                     // the start/end of that timeframe
                     objectKeyedByGroup[item.group][date].push(item)
+                } else if (timeframe === 'day' && (date === start.format('MM-DD-YYYY') || date === end.format('MM-DD-YYYY'))) {
+                    objectKeyedByGroup[item.group][date].push(item)
                 } else if ( timeframe === 'year' && (moment(date).years() === start.years() || moment(date).years() === end.years()) ) {
                     // Should handle case where the start or end time falls on
                     // the start/end of that timeframe
