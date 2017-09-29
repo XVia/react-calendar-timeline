@@ -1043,6 +1043,40 @@ export default class ReactCalendarTimeline extends Component {
     )
   }
 
+  generateShowMoreSkeleton(items, groups) {
+      const { visibleTimeEnd, visibleTimeStart, timeframe } = this.state;
+      let format = 'MM-DD-YYYY'
+
+      if (timeframe === 'hour') {
+          format = 'MM-DD-YYYY-LT'
+      }
+
+      // Init empty array of showMoreButtons
+      let showMoreButtons = [];
+      // Init as empty object
+      let objectKeyedByGroup = {};
+
+      // Build out basic groups
+      groups.map(group => {
+          return objectKeyedByGroup[group.id] = {};
+      });
+
+      const start = moment(visibleTimeStart)
+      const end = moment(visibleTimeEnd)
+      let totalSlots = end.diff(start, timeframe)
+
+      // Build out skeleton list
+      for (let i = 0; i < totalSlots; i++) {
+        const slot = moment(start.add(1, timeframe)).startOf(timeframe).format(format)
+        // Attach dates to the objectKeyedByGroup
+        for (var group in objectKeyedByGroup) {
+            objectKeyedByGroup[group][slot] = []
+        }
+      }
+
+      return objectKeyedByGroup;
+  }
+
   stackItems (items, groups, canvasTimeStart, visibleTimeStart, visibleTimeEnd, width) {
     // if there are no groups return an empty array of dimensions
     if (groups.length === 0) {
@@ -1055,7 +1089,7 @@ export default class ReactCalendarTimeline extends Component {
     }
 
     const { keys, dragSnap, lineHeight, headerLabelGroupHeight, headerLabelHeight, stackItems, fullUpdate, itemHeightRatio, groupHeight, itemStackLength } = this.props
-    const { draggingItem, dragTime, resizingItem, resizingEdge, resizeTime, newGroupOrder } = this.state
+    const { draggingItem, dragTime, resizingItem, resizingEdge, resizeTime, newGroupOrder, timeframe } = this.state
     const zoom = visibleTimeEnd - visibleTimeStart
     const canvasTimeEnd = canvasTimeStart + zoom * 3
     const canvasWidth = width * 3
@@ -1063,6 +1097,8 @@ export default class ReactCalendarTimeline extends Component {
 
     const visibleItems = getVisibleItems(items, canvasTimeStart, canvasTimeEnd, keys)
     const groupOrders = getGroupOrders(groups, keys)
+
+    let showMoreDataSlots = this.generateShowMoreSkeleton(items, groups);
 
     let dimensionItems = visibleItems.reduce((memo, item) => {
       const itemId = _get(item, keys.itemIdKey)
@@ -1100,6 +1136,32 @@ export default class ReactCalendarTimeline extends Component {
           end_time: _get(item, keys.itemTimeEndKey),
           dimensions: dimension
         })
+
+        // do stuff w/ show more
+        const start = moment(item.start_time)
+        const end = moment(item.end_time)
+
+        for (var date in showMoreDataSlots[item.group]) {
+            if (moment(date).isBetween(start, end) ) {
+                showMoreDataSlots[item.group][date].push(item)
+            } else if ((timeframe === 'hour' || timeframe === 'day') && (moment(date).isSame(start) || moment(date).isSame(end))) {
+                // Should handle case where the start or end time falls on
+                // the start/end of that timeframe
+                showMoreDataSlots[item.group][date].push(item)
+            } else if (timeframe === 'day' && (date === start.format('MM-DD-YYYY') || date === end.format('MM-DD-YYYY'))) {
+                showMoreDataSlots[item.group][date].push(item)
+            } else if ( timeframe === 'year' && (moment(date).years() === start.years() || moment(date).years() === end.years()) ) {
+                // Should handle case where the start or end time falls on
+                // the start/end of that timeframe
+                showMoreDataSlots[item.group][date].push(item)
+            } else if ( timeframe === 'month' && ( (moment(date).months() === start.months() && moment(date).years() === start.years()) || (moment(date).months() === end.months() && moment(date).years() === end.years()) )) {
+                objectKeyedByGroup[item.group][date].push(item)
+            } else if ( timeframe === 'week' && ((moment(date).weeks() === start.weeks() && moment(date).years() === start.years()) || (moment(date).weeks() === end.weeks() && moment(date).years() === end.years())) ) {
+                showMoreDataSlots[item.group][date].push(item);
+            } else if ( timeframe === 'quarter' && ((moment(date).quarter() === start.quarter() && moment(date).years() === start.years()) || (moment(date).quarter() === end.quarter() && moment(date).years() === end.years()) )) {
+                showMoreDataSlots[item.group][date].push(item);
+            }
+        }
       }
 
       return memo
@@ -1111,8 +1173,23 @@ export default class ReactCalendarTimeline extends Component {
       stackingMethod = groupHeight ? stackFixedGroupHeight : stack;
     }
 
+    let showMoreButtons = [];
+
     // Generate the things for show more
-    const showMoreButtons = this.getShowMorebuttons(items, groups);
+   for (var group in showMoreDataSlots) {
+       for (var slot in showMoreDataSlots[group]) {
+           if (showMoreDataSlots[group][slot].length > itemStackLength) {
+               const showMoreButtonId = `${group}-${slot}`
+               showMoreButtons.push({
+                   id: showMoreButtonId,
+                   groupId: parseInt(group),
+                   timeframe,
+                   slot,
+                   items: showMoreDataSlots[group][slot]
+               })
+           }
+       }
+   }
 
     const { height, groupHeights, groupTops, groupedItems } = stackingMethod(
       dimensionItems,
@@ -1216,87 +1293,6 @@ export default class ReactCalendarTimeline extends Component {
     return React.Children.map(childArray, child => React.cloneElement(child, childProps))
   }
 
-  getShowMorebuttons(items, groups) {
-      const { minUnit, timeSteps, height, itemStackLength } = this.props
-      const { visibleTimeEnd, visibleTimeStart, groupHeights } = this.state;
-      let { timeframe } = this.state;
-      let format = 'MM-DD-YYYY'
-
-      if (timeframe === 'hour') {
-          format = 'MM-DD-YYYY-LT'
-      }
-
-      // Init empty array of showMoreButtons
-      let showMoreButtons = [];
-      // Init as empty object
-      let objectKeyedByGroup = {};
-
-      // Build out basic groups
-      groups.map(group => {
-          return objectKeyedByGroup[group.id] = {};
-      });
-
-      const start = moment(visibleTimeStart)
-      const end = moment(visibleTimeEnd)
-      let totalSlots = end.diff(start, timeframe)
-
-
-      // Build out skeleton list
-      for (let i = 0; i < totalSlots; i++) {
-        const slot = moment(start.add(1, timeframe)).startOf(timeframe).format(format)
-        // Attach dates to the objectKeyedByGroup
-        for (var group in objectKeyedByGroup) {
-            objectKeyedByGroup[group][slot] = []
-        }
-      }
-
-        // Go through items and add them to dates per group
-        items.forEach(item => {
-            const start = moment(item.start_time)
-            const end = moment(item.end_time)
-
-            for (var date in objectKeyedByGroup[item.group]) {
-                if (moment(date).isBetween(start, end) ) {
-                    objectKeyedByGroup[item.group][date].push(item)
-                } else if ((timeframe === 'hour' || timeframe === 'day') && (moment(date).isSame(start) || moment(date).isSame(end))) {
-                    // Should handle case where the start or end time falls on
-                    // the start/end of that timeframe
-                    objectKeyedByGroup[item.group][date].push(item)
-                } else if (timeframe === 'day' && (date === start.format('MM-DD-YYYY') || date === end.format('MM-DD-YYYY'))) {
-                    objectKeyedByGroup[item.group][date].push(item)
-                } else if ( timeframe === 'year' && (moment(date).years() === start.years() || moment(date).years() === end.years()) ) {
-                    // Should handle case where the start or end time falls on
-                    // the start/end of that timeframe
-                    objectKeyedByGroup[item.group][date].push(item)
-                } else if ( timeframe === 'month' && ( (moment(date).months() === start.months() && moment(date).years() === start.years()) || (moment(date).months() === end.months() && moment(date).years() === end.years()) )) {
-                    objectKeyedByGroup[item.group][date].push(item)
-                } else if ( timeframe === 'week' && ((moment(date).weeks() === start.weeks() && moment(date).years() === start.years()) || (moment(date).weeks() === end.weeks() && moment(date).years() === end.years())) ) {
-                    objectKeyedByGroup[item.group][date].push(item);
-                } else if ( timeframe === 'quarter' && ((moment(date).quarter() === start.quarter() && moment(date).years() === start.years()) || (moment(date).quarter() === end.quarter() && moment(date).years() === end.years()) )) {
-                    objectKeyedByGroup[item.group][date].push(item);
-                }
-            }
-        });
-
-        // See if we need a show more button based on some length (3)
-       for (var group in objectKeyedByGroup) {
-           for (var slot in objectKeyedByGroup[group]) {
-               if (objectKeyedByGroup[group][slot].length > itemStackLength) {
-                   const showMoreButtonId = `${group}-${slot}`
-                   showMoreButtons.push({
-                       id: showMoreButtonId,
-                       groupId: parseInt(group),
-                       timeframe,
-                       slot,
-                       items: objectKeyedByGroup[group][slot]
-                   })
-               }
-           }
-       }
-
-      return showMoreButtons;
-  }
-
   getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups, timeframe) {
       let format = 'MM-DD-YYYY'
 
@@ -1366,7 +1362,8 @@ export default class ReactCalendarTimeline extends Component {
     this.props.onItemClick(item.id, evt)
   }
 
-  showMorePopup(showMoreButtonProps, dimensions, timeframe) {
+  showMorePopup = (showMoreButtonProps, dimensions, timeframe) => {
+
     if (showMoreButtonProps && dimensions && dimensions.left && dimensions.top) {
       const { top, left, diffTop, diffLeft, width } = dimensions;
       let format;
@@ -1403,9 +1400,17 @@ export default class ReactCalendarTimeline extends Component {
                        top: top + diffTop,
                        left: left - diffLeft + width + 4}}>
                   <p className="mbs">{moment(showMoreButtonProps.slot).startOf(timeframe).format(format)}</p>
-                  <div>{showMoreButtonProps.items.map(item => {
-                            return <a className="Diagram__menu-item" onClick={this.onShowMoreItemClick.bind(this, item)} key={item.id}>{this.props.itemRenderer({ item })}</a>
-                        })}
+                  <div>{
+                        showMoreButtonProps.items.map(item => {
+                            return (
+                                <a className="Diagram__menu-item"
+                                    onClick={this.onShowMoreItemClick.bind(this, item)}
+                                    key={item.id}>
+                                    {this.props.itemRenderer({ item })}
+                                </a>
+                            );
+                        })
+                        }
                   </div>
               </div>
           </WatchForClickOut>
