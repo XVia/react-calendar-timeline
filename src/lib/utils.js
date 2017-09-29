@@ -377,7 +377,7 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
 
       // adjusted height after accounting for itemVerticalMargin
-      let groupHeightAdjusted = groupHeight - (itemSpacing * (3));
+      let groupHeightAdjusted = groupHeight - (itemSpacing * (4));
 
       // dynamic line height to fit items into the group height
       let divideBy = items.length > 3 ? 4 : items.length;
