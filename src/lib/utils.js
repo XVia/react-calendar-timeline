@@ -306,7 +306,7 @@ function horizontalCollision(a, b) {
   return !( aRight < b.left || a.left > bRight );
 }
 
-export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, showMoreButtons) {
+export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, showMoreButtons, itemStackLength) {
   const itemSpacing = 3;
   let i;
   let totalHeight = headerHeight;
@@ -377,10 +377,10 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
 
       // adjusted height after accounting for itemVerticalMargin
-      let groupHeightAdjusted = groupHeight - (itemSpacing * (4));
+      let groupHeightAdjusted = groupHeight - (itemSpacing * (1 + itemStackLength));
 
       // dynamic line height to fit items into the group height
-      let divideBy = items.length > 3 ? 4 : items.length;
+      let divideBy = items.length > (itemStackLength) ? itemStackLength + 1 : items.length;
 
       let lineHeight = Math.floor(groupHeightAdjusted / divideBy);
 
@@ -401,7 +401,7 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
         }
 
         // Hide if greater than 3 for the date and there is a show more button
-        if (i > 2 && hasShowMore && hasShowMore.length) {
+        if (i >= itemStackLength && hasShowMore && hasShowMore.length) {
             hasShowMore.forEach(showMore => {
                 showMore.items.some(showMoreItem => {
                     if (showMoreItem.id === item.id) {
@@ -413,7 +413,7 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
         }
 
         // Do some more fancy stuffs with collision
-        if (i >= 4 && hasShowMore && !item.dimensions.hide) {
+        if ((i >= itemStackLength + 1) && hasShowMore && !item.dimensions.hide) {
             collidingItems[itemId].some(collidingItem => {
                 if (!horizontalCollision(collidingItem.dimensions, item.dimensions)) {
                     item.dimensions.top = collidingItem.dimensions.top;
