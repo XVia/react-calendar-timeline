@@ -1155,7 +1155,7 @@ export default class ReactCalendarTimeline extends Component {
                 // the start/end of that timeframe
                 showMoreDataSlots[item.group][date].push(item)
             } else if ( timeframe === 'month' && ( (moment(date).months() === start.months() && moment(date).years() === start.years()) || (moment(date).months() === end.months() && moment(date).years() === end.years()) )) {
-                objectKeyedByGroup[item.group][date].push(item)
+                showMoreDataSlots[item.group][date].push(item);
             } else if ( timeframe === 'week' && ((moment(date).weeks() === start.weeks() && moment(date).years() === start.years()) || (moment(date).weeks() === end.weeks() && moment(date).years() === end.years())) ) {
                 showMoreDataSlots[item.group][date].push(item);
             } else if ( timeframe === 'quarter' && ((moment(date).quarter() === start.quarter() && moment(date).years() === start.years()) || (moment(date).quarter() === end.quarter() && moment(date).years() === end.years()) )) {
