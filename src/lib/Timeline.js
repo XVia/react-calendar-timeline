@@ -1336,17 +1336,16 @@ export default class ReactCalendarTimeline extends Component {
 
     if (buttons.length) {
         return buttons.map(button => {
+
             const itemsHidden = dimensionItems.filter(dItem => {
                 if (dItem.dimensions.hide) {
                     if (moment(button.slot).isBetween(moment(dItem.start_time).startOf(timeframe), moment(dItem.end_time).startOf(timeframe), null, '[]')) {
                         return true;
                     }
-                } else {
-                    return false;
                 }
             });
 
-            return <ShowMoreButton moreLength={itemsHidden.length} button={button} key={button.id} onClick={this.handleShowMoreClick.bind(this)}/>;
+            return <ShowMoreButton moreLength={itemsHidden.length ? itemsHidden.length : ''} button={button} key={button.id} onClick={this.handleShowMoreClick.bind(this)}/>;
         });
     } else {
       return null
