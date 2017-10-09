@@ -1274,20 +1274,20 @@ export default class ReactCalendarTimeline extends Component {
       canvasTimeStart,
       canvasTimeEnd,
       canvasWidth,
-      visibleTimeStart: visibleTimeStart,
-      visibleTimeEnd: visibleTimeEnd,
+      visibleTimeStart,
+      visibleTimeEnd,
       dimensionItems,
       items: this.props.items,
       groups: this.props.groups,
       keys: this.props.keys,
       // TODO: combine these two
-      groupHeights: groupHeights,
-      groupTops: groupTops,
+      groupHeights,
+      groupTops,
       selected: this.state.selectedItem && !this.props.selected ? [this.state.selectedItem] : (this.props.selected || []),
-      height: height,
-      headerHeight: headerHeight,
-      minUnit: minUnit,
-      timeSteps: timeSteps
+      height,
+      headerHeight,
+      minUnit,
+      timeSteps
     }
 
     return React.Children.map(childArray, child => React.cloneElement(child, childProps))
@@ -1331,12 +1331,11 @@ export default class ReactCalendarTimeline extends Component {
       return showMoreButtons
   }
 
-  showMoreButtons(buttons) {
-    const { dimensionItems, timeframe } = this.state;
+  showMoreButtons(buttons, dimensionItems) {
+    const { timeframe } = this.state;
 
     if (buttons.length) {
         return buttons.map(button => {
-
             const itemsHidden = dimensionItems.filter(dItem => {
                 if (dItem.dimensions.hide) {
                     if (moment(button.slot).isBetween(moment(dItem.start_time).startOf(timeframe), moment(dItem.end_time).startOf(timeframe), null, '[]')) {
@@ -1489,7 +1488,7 @@ export default class ReactCalendarTimeline extends Component {
                 ? this.cursorLine(cursorTime, canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, height, headerHeight)
                 : null}
               {this.infoLabel()}
-              {this.showMoreButtons(showMoreButtons)}
+              {this.showMoreButtons(showMoreButtons, dimensionItems)}
               {this.header(
                 canvasTimeStart,
                 zoom,
