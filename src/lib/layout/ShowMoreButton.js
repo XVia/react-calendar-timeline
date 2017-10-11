@@ -13,7 +13,7 @@ export default class showMoreButton extends Component {
     return (
       <div className='rct-show-more-button'
            style={{ position: 'absolute', top: button.top, left: button.left - 2, zIndex: 50, userSelect: 'none' }}>
-        <a onClick={this.handleClick.bind(this)}>{moreLength}+ more </a>
+        <a onClick={this.handleClick.bind(this)}>+{moreLength} more </a>
       </div>
     )
   }
