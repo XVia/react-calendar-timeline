@@ -422,6 +422,10 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
             });
         }
 
+        if (i >= 4) {
+            item.dimensions.hide = true;
+        }
+
         itemSpacingTotal += itemSpacing;
       }
     });
