@@ -1150,15 +1150,15 @@ export default class ReactCalendarTimeline extends Component {
                 showMoreDataSlots[item.group][date].push(item)
             } else if (timeframe === 'day' && (date === start.format('MM-DD-YYYY') || date === end.format('MM-DD-YYYY'))) {
                 showMoreDataSlots[item.group][date].push(item)
-            } else if ( timeframe === 'year' && (moment(date).years() === start.years() || moment(date).years() === end.years()) ) {
+            } else if ( timeframe === 'year' && (moment(date).year() === start.year() || moment(date).year() === end.year()) ) {
                 // Should handle case where the start or end time falls on
                 // the start/end of that timeframe
                 showMoreDataSlots[item.group][date].push(item)
-            } else if ( timeframe === 'month' && ( (moment(date).months() === start.months() && moment(date).years() === start.years()) || (moment(date).months() === end.months() && moment(date).years() === end.years()) )) {
+            } else if ( timeframe === 'month' && ( (moment(date).month() === start.month() && moment(date).year() === start.year()) || (moment(date).month() === end.month() && moment(date).year() === end.year()) )) {
                 showMoreDataSlots[item.group][date].push(item);
-            } else if ( timeframe === 'week' && ((moment(date).weeks() === start.weeks() && moment(date).years() === start.years()) || (moment(date).weeks() === end.weeks() && moment(date).years() === end.years())) ) {
+            } else if ( timeframe === 'week' && ((moment(date).weeks() === start.weeks() && moment(date).year() === start.year()) || (moment(date).weeks() === end.weeks() && moment(date).year() === end.year())) ) {
                 showMoreDataSlots[item.group][date].push(item);
-            } else if ( timeframe === 'quarter' && ((moment(date).quarter() === start.quarter() && moment(date).years() === start.years()) || (moment(date).quarter() === end.quarter() && moment(date).years() === end.years()) )) {
+            } else if ( timeframe === 'quarter' && ((moment(date).quarter() === start.quarter() && moment(date).year() === start.year()) || (moment(date).quarter() === end.quarter() && moment(date).year() === end.year()) )) {
                 showMoreDataSlots[item.group][date].push(item);
             }
         }
@@ -1390,7 +1390,7 @@ export default class ReactCalendarTimeline extends Component {
 
       return (
           <WatchForClickOut onClickOut={this.onClickOut.bind(this)}>
-              <div className="Diagram__menu Diagram__menu--show-more"
+              <div className="Timeline__showMoreMenu"
                    style={{
                        zIndex: 110,
                        backgroundColor: 'white',
