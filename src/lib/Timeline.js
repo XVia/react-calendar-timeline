@@ -417,8 +417,6 @@ export default class ReactCalendarTimeline extends Component {
       this.singleTouchStart = null
       this.lastSingleTouch = null
     } else if (e.touches.length === 1) {
-      e.preventDefault()
-
       let x = e.touches[0].clientX
       let y = e.touches[0].clientY
 
@@ -478,8 +476,6 @@ export default class ReactCalendarTimeline extends Component {
       this.lastTouchDistance = null
     }
     if (this.lastSingleTouch) {
-      e.preventDefault()
-
       this.lastSingleTouch = null
       this.singleTouchStart = null
     }
