@@ -360,7 +360,6 @@ export default class ReactCalendarTimeline extends Component {
     this.lastTouchDistance = null
 
     const scrollContainer = document.querySelector(this.props.scrollContainerClassname);
-
     if (this.props.scrollContainerClassname && scrollContainer) {
         scrollContainer.addEventListener('scroll', this.scrollEventListener);
     } else {
@@ -399,6 +398,8 @@ export default class ReactCalendarTimeline extends Component {
     const rect = this.refs.container.getBoundingClientRect()
     const topOffset = stickyOffset ? stickyOffset : 0
     const scrollOffset = scrollContainerClassname ? e.target.scrollTop : 0
+
+    this.setState({ showMore: null });    
 
     if (rect.top > topOffset) {
       this.setState({ headerPosition: 'top', scrollOffset })
