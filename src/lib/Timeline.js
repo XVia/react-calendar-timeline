@@ -1331,15 +1331,16 @@ export default class ReactCalendarTimeline extends Component {
     const { timeframe } = this.state;
 
     if (buttons.length) {
-        return buttons.map(button => {
+      return buttons.map(button => {
             const itemsHidden = dimensionItems.filter(dItem => {
                 if (dItem.dimensions.hide) {
-                    if (moment(button.slot).isBetween(moment(dItem.start_time).startOf(timeframe), moment(dItem.end_time).startOf(timeframe), null, '[]')) {
-                        return true;
+                  if (moment(button.slot).isBetween(moment(dItem.start_time).startOf(timeframe), moment(dItem.end_time).startOf(timeframe), null, '[]')) {
+                    if (button.items.some(item => item.id === dItem.id)) {
+                      return true;
                     }
+                  }
                 }
             });
-
             return <ShowMoreButton moreLength={itemsHidden.length ? itemsHidden.length : ''} button={button} key={button.id} onClick={this.handleShowMoreClick.bind(this)}/>;
         });
     } else {
@@ -1395,7 +1396,7 @@ export default class ReactCalendarTimeline extends Component {
                        left: left - diffLeft + width + 4}}>
                   <p className="mbs">{moment(showMoreButtonProps.slot).startOf(timeframe).format(format)}</p>
                   <div>{
-                        showMoreButtonProps.items.map(item => {
+              showMoreButtonProps.items.map(item => {
                             return (
                                 <a className="Diagram__menu-item"
                                     onClick={this.onShowMoreItemClick.bind(this, item)}
@@ -1415,7 +1416,7 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   handleShowMoreClick(evt, buttonsProps) {
-      const { left, top, width } = evt.currentTarget.getBoundingClientRect()
+    const { left, top, width } = evt.currentTarget.getBoundingClientRect();
       this.setState({ showMore: buttonsProps, showMorePosition: { top, left, diffLeft: 0, diffTop: 0, width } });
   }
 
