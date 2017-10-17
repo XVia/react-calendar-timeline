@@ -1496,10 +1496,10 @@ export default class ReactCalendarTimeline extends Component {
                 headerLabelGroupHeight,
                 headerLabelHeight
               )}
-              {this.showMorePopup(showMore, showMorePosition, timeframe)}
               {this.childrenWithProps(canvasTimeStart, canvasTimeEnd, canvasWidth, dimensionItems, groupHeights, groupTops, height, headerHeight, visibleTimeStart, visibleTimeEnd, minUnit, timeSteps)}
             </div>
           </div>
+          {this.showMorePopup(showMore, showMorePosition, timeframe)}
           {rightSidebarWidth > 0 ? this.rightSidebar(height, groupHeights, headerHeight) : null}
         </div>
       </div>
