@@ -623,44 +623,6 @@ export default class ReactCalendarTimeline extends Component {
     this.changeZoom(1.0 + speed * deltaY / 500, xPosition / this.state.width)
   }
 
-  // onWheel = (e) => {
-  //   const { traditionalZoom } = this.props
-  //
-  //   e.preventDefault()
-  //
-  //   // zoom in the time dimension
-  //   if (e.ctrlKey || e.metaKey || e.altKey) {
-  //     const parentPosition = getParentPosition(e.currentTarget)
-  //     const xPosition = e.clientX - parentPosition.x
-  //
-  //     const speed = e.ctrlKey ? 10 : e.metaKey ? 3 : 1
-  //
-  //     this.zoomWithWheel(speed, xPosition, e.deltaY)
-  //
-  //   // convert vertical zoom to horiziontal
-  //   } else if (e.shiftKey) {
-  //     const scrollComponent = this.refs.scrollComponent
-  //     scrollComponent.scrollLeft += e.deltaY
-  //
-  //   // no modifier pressed? we prevented the default event, so scroll or zoom as needed
-  //   } else {
-  //     if (e.deltaX !== 0) {
-  //       if (!traditionalZoom) {
-  //         this.refs.scrollComponent.scrollLeft += e.deltaX
-  //       }
-  //     }
-  //     if (e.deltaY !== 0) {
-  //       window.scrollTo(window.pageXOffset, window.pageYOffset + e.deltaY)
-  //       if (traditionalZoom) {
-  //         const parentPosition = getParentPosition(e.currentTarget)
-  //         const xPosition = e.clientX - parentPosition.x
-  //
-  //         this.zoomWithWheel(10, xPosition, e.deltaY)
-  //       }
-  //     }
-  //   }
-  // }
-
   zoomIn (e) {
     e.preventDefault()
 
@@ -685,29 +647,6 @@ export default class ReactCalendarTimeline extends Component {
   onHeaderClick = (from, unit, e) => {
     this.props.onHeaderClick(from, unit, e);
   }
-
-  // showPeriod = (from, unit) => {
-  //   let visibleTimeStart = from.valueOf()
-  //   let visibleTimeEnd = moment(from).add(1, unit).valueOf()
-  //   let zoom = visibleTimeEnd - visibleTimeStart
-  //   let minZoom = this.props.minZoom;
-  //
-  //   // can't zoom in more than to show one hour
-  //   if (zoom <= minZoom) {
-  //     return
-  //   }
-  //
-  //   // clicked on the big header and already focused here, zoom out
-  //   if (unit !== 'year' && this.state.visibleTimeStart === visibleTimeStart && this.state.visibleTimeEnd === visibleTimeEnd) {
-  //     let nextUnit = getNextUnit(unit)
-  //
-  //     visibleTimeStart = from.startOf(nextUnit).valueOf()
-  //     visibleTimeEnd = moment(visibleTimeStart).add(1, nextUnit)
-  //     zoom = visibleTimeEnd - visibleTimeStart
-  //   }
-  //
-  //   this.props.onTimeChange(visibleTimeStart, visibleTimeStart + zoom, this.updateScrollCanvas)
-  // }
 
   selectItem = (item, clickType, e) => {
     if (this.state.selectedItem === item || (this.props.itemTouchSendsClick && clickType === 'touch')) {
@@ -769,7 +708,6 @@ export default class ReactCalendarTimeline extends Component {
   dragItem = (item, dragTime, newGroupOrder) => {
     let newGroup = this.props.groups[newGroupOrder]
     const keys = this.props.keys
-
     this.setState({
       showMore: null,
       draggingItem: item,

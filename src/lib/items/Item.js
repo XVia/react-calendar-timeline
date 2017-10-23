@@ -127,7 +127,7 @@ export default class Item extends Component {
       const deltaX = e.pageX - this.state.dragStart.x
       const timeDelta = deltaX * this.coordinateToTimeRatio()
 
-      return this.dragTimeSnap(startTime + timeDelta, false)
+      return this.dragTimeSnap(startTime + timeDelta, true)
     } else {
       return startTime
     }
