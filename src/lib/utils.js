@@ -185,7 +185,6 @@ export function getVisibleItems (items, canvasTimeStart, canvasTimeEnd, keys) {
 }
 
 export function collision (a, b, lineHeight) {
-  // var verticalMargin = (lineHeight - a.height)/2;
   var verticalMargin = 0;
   return ((a.collisionLeft + EPSILON) < (b.collisionLeft + b.collisionWidth) &&
   (a.collisionLeft + a.collisionWidth - EPSILON) > b.collisionLeft &&
@@ -296,149 +295,123 @@ export function nostack (items, groupOrders, lineHeight, headerHeight, force) {
   };
 }
 
-function horizontalCollision(a, b) {
-  // NOTE: 20px is our mininum width for timeline events - check timelineView.scss
-  a.width = a.width < 20 ? 20 : a.width;
-  b.width = b.width < 20 ? 20 : b.width;
+export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, itemHeight, timeframe, timeSteps) {
+  const itemSpacing = 4;
 
-  const aRight = a.left + a.width;
-  const bRight = b.left + b.width;
-  return !( aRight < b.left || a.left > bRight );
-}
-
-export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHeight, force, groupHeight, showMoreButtons, itemStackLength) {
-  const itemSpacing = 3;
-  let i;
   let totalHeight = headerHeight;
 
   let groupHeights = [];
   let groupTops = [];
-
   let groupedItems = getGroupedItems(items, groupOrders);
 
-  groupedItems.forEach(function (group, index, array) {
+  let showMoreDataSlots = {};
+
+  let format = 'MM-DD-YYYY';
+  if (timeframe === 'hour') {
+      format = 'MM-DD-YYYY-LT';
+  }
+
+  let hiddenItemIds = [];
+
+  // hide an item in the group and make it available in a show more popup
+  function hideItem(groupId, item) {
+    if (hiddenItemIds.includes(item.id)) return;
+
+    item.dimensions.hide = true;
+
+    iterateTimes(item.start_time, item.end_time, timeframe, timeSteps, (time) => {
+      const slot = time.format(format);
+      // initialize object for this group
+      showMoreDataSlots[groupId] = showMoreDataSlots[groupId] || {};
+      // // initialize array for this group/date
+      showMoreDataSlots[groupId][slot] = showMoreDataSlots[groupId][slot] || [];
+      // // add the item to this group/date list
+      showMoreDataSlots[groupId][slot].push(item);
+    });
+
+    hiddenItemIds.push(item.id);
+  }
+
+  // reset top position of all items
+  for (let i = 0; i < items.length; i++) {
+    items[i].dimensions.top = null;
+  }
+
+  groupedItems.forEach(function (group, index) {
     // calculate new, non-overlapping positions
     groupTops.push(totalHeight);
 
-    // first set them all to the same top position
-    // default height to groupHeight
-    group.forEach((item, idx) => {
-      item.dimensions.top = totalHeight + itemSpacing;
-      item.dimensions.height = (groupHeight / 2);
-    });
-
-    let collidingItems = {};
-
-    // loop through each item in the group and check if it collides with any others
-    for (i = 0; i < group.length; i++) {
-      let item = group[i];
-
-      for (var j = 0; j < group.length; j++) {
-        var other = group[j];
-        if (other !== item && horizontalCollision(item.dimensions, other.dimensions)) {
-          collidingItems[item.id] = collidingItems[item.id] || [item];
-          collidingItems[item.id].push(other);
-        }
+    // figure out the groupId from groupOrders object,
+    // which is a key/value - [groupId: number]: order: number
+    let groupId;
+    for (let key in groupOrders) {
+      if (groupOrders[key] === index) {
+          groupId = key;
       }
     }
 
-    // Make a sorted list of collidingItems by comparing the length of each list.
-    // The longer lists need to be dealt with last since having more
-    // collisding items will make the line height smaller for each item.
-    const list = Object.keys(collidingItems).sort((a, b) => {
-      const itemGroupA = collidingItems[a];
-      const itemGroupB = collidingItems[b];
-      const diff = itemGroupA.length - itemGroupB.length;
+    // Loop through all items and do some collision detection.
+    // Reposition items top position until no more are colliding.
+    for (let i = 0; i < group.length; i++) {
+      let item = group[i];
 
-      if (diff === 0) {
-        return 0;
-      } else if (diff < 0) {
-        return -1;
-      } else {
-        return 1;
-      }
-    });
+      if (item.dimensions.top === null) {
+        item.dimensions.top = totalHeight + itemSpacing;
 
-    // loop through the sorted collided items
-    list.forEach(itemId => {
-      let items = collidingItems[itemId];
+        do {
+          var collidingItem = null;
+          for (let j = 0; j < group.length; j++) {
+            let other = group[j];
+            if (other.dimensions.top !== null && other !== item && collision(item.dimensions, other.dimensions)) {
+              collidingItem = other;
+              break;
+            }
+          }
 
-      let groupId = null;
-      for (let key in groupOrders) {
-        if (groupOrders[key] == index) {
-            groupId = key;
-        }
+          if (collidingItem !== null) {
+            // There is a collision. Reposition the items below the colliding element
+            item.dimensions.top = collidingItem.dimensions.top + itemHeight + itemSpacing;
+          }
+        } while (collidingItem);
       }
 
-      // See if we have a show more button in the column to hide the record below
-      const hasShowMore = showMoreButtons.filter(button => button.groupId === parseInt(groupId));
+      // Check if the item is outside of the group height
+      if (item.dimensions.top + item.dimensions.height > totalHeight + groupHeight) {
+        // Item is outside of the fixed group heigh, so hide it and add it to a show more button
+        hideItem(groupId, item);
 
-      // sort each item by id so they are in a consistent order
-      items = items.sort((a, b) => a.id < b.id ? -1 : 1 );
-
-      // adjusted height after accounting for itemVerticalMargin
-      let groupHeightAdjusted = groupHeight - (itemSpacing * (1 + itemStackLength));
-
-      // dynamic line height to fit items into the group height
-      let divideBy = items.length > (itemStackLength) ? itemStackLength + 1 : items.length;
-
-      let lineHeight = Math.floor(groupHeightAdjusted / divideBy);
-
-      let itemSpacingTotal = itemSpacing;
-
-      // Loop through this set of collided items
-      // and set the new dimensions for each one.
-      // Bump each one down to the next lineHeight so they stack.
-      for (i = 0; i < items.length; i++) {
-        const item = items[i];
-        // top offset relative to this group
-        const topOffset = (lineHeight * i) + itemSpacingTotal;
-
-        if (item) {
-            // set the new dimensions to stack them
-            item.dimensions.top = totalHeight + topOffset;
-            item.dimensions.height = lineHeight;
+        // Once there is a hidden item in a group we have to hide the previous item
+        // to make room for the show more button at the bottom of the group.
+        if (i !== 0) {
+          hideItem(groupId, group[i - 1]);
         }
-
-        // Hide if greater than 3 for the date and there is a show more button
-        if (i >= itemStackLength && hasShowMore && hasShowMore.length) {
-            hasShowMore.forEach(showMore => {
-                showMore.items.some(showMoreItem => {
-                    if (showMoreItem.id === item.id) {
-                        item.dimensions.hide = true;
-                        return true;
-                    }
-                });
-            });
-        }
-
-        // Do some more fancy stuffs with collision
-        if ((i >= itemStackLength + 1) && hasShowMore && !item.dimensions.hide) {
-            collidingItems[itemId].some(collidingItem => {
-                if (!horizontalCollision(collidingItem.dimensions, item.dimensions)) {
-                    item.dimensions.top = collidingItem.dimensions.top;
-                    return true;
-                }
-            });
-        }
-
-        if (i >= 4) {
-            item.dimensions.hide = true;
-        }
-
-        itemSpacingTotal += itemSpacing;
       }
-    });
+    }
 
     groupHeights.push(groupHeight);
     totalHeight += groupHeight;
   });
 
+  // now build a list of show more buttons to be displayed
+  let showMoreButtons = [];
+  for (let groupId in showMoreDataSlots) {
+    for (let slot in showMoreDataSlots[groupId]) {
+      showMoreButtons.push({
+        id: `${groupId}-${slot}`,
+        groupId: parseInt(groupId),
+        timeframe,
+        slot,
+        items: showMoreDataSlots[groupId][slot]
+      });
+    }
+  }
+
   return {
     height: totalHeight,
     groupHeights,
     groupTops,
-    groupedItems
+    groupedItems,
+    showMoreButtons
   };
 }
 
