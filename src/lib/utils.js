@@ -306,9 +306,9 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
 
   let showMoreDataSlots = {};
 
-  let format = 'MM-DD-YYYY';
+  let format = 'YYYY-MM-DD';
   if (timeframe === 'hour') {
-      format = 'MM-DD-YYYY-LT';
+      format = null; // defaults to ISO format
   }
 
   let hiddenItemIds = [];
@@ -323,9 +323,9 @@ export function stackFixedGroupHeight (items, groupOrders, lineHeight, headerHei
       const slot = time.format(format);
       // initialize object for this group
       showMoreDataSlots[groupId] = showMoreDataSlots[groupId] || {};
-      // // initialize array for this group/date
+      // initialize array for this group/date
       showMoreDataSlots[groupId][slot] = showMoreDataSlots[groupId][slot] || [];
-      // // add the item to this group/date list
+      // add the item to this group/date list
       showMoreDataSlots[groupId][slot].push(item);
     });
 

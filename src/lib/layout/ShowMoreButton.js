@@ -1,20 +1,20 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 
 export default class showMoreButton extends Component {
 
-  handleClick(evt) {
+  handleClick = (evt) => {
     this.props.onClick(evt, this.props.button);
   }
 
   render () {
-
-    const { button, moreLength } = this.props
+    let { button, moreLength } = this.props;
+    moreLength = moreLength || '';
 
     return (
-      <div className='rct-show-more-button'
+      <div className="rct-show-more-button"
            style={{ position: 'absolute', top: button.top, left: button.left - 2, zIndex: 50, userSelect: 'none' }}>
-        <a onClick={this.handleClick.bind(this)}>+{moreLength} more </a>
+        <a onClick={this.handleClick}>+{moreLength} more </a>
       </div>
-    )
+    );
   }
 }

@@ -17,7 +17,7 @@ import windowResizeDetector from '../resize-detector/window';
 
 import WatchForClickOut from 'xv/util/WatchForClickOut';
 
-import { iterateTimes, getMinUnit, getParentPosition, _get, _length, stack, nostack, stackFixedGroupHeight, calculateDimensions, getGroupOrders, getVisibleItems, hasSomeParentTheClass } from './utils.js';
+import { getMinUnit, getParentPosition, _get, _length, stack, nostack, stackFixedGroupHeight, calculateDimensions, getGroupOrders, getVisibleItems, hasSomeParentTheClass } from './utils.js';
 
 export const defaultKeys = {
   groupIdKey: 'id',
@@ -975,40 +975,6 @@ export default class ReactCalendarTimeline extends Component {
     );
   }
 
-  generateShowMoreSkeleton(items, groups) {
-      const { visibleTimeEnd, visibleTimeStart, timeframe } = this.state;
-      let format = 'MM-DD-YYYY';
-
-      if (timeframe === 'hour') {
-          format = 'MM-DD-YYYY-LT';
-      }
-
-      // Init empty array of showMoreButtons
-      let showMoreButtons = [];
-      // Init as empty object
-      let objectKeyedByGroup = {};
-
-      // Build out basic groups
-      groups.map(group => {
-          return objectKeyedByGroup[group.id] = {};
-      });
-
-      const start = moment(visibleTimeStart);
-      const end = moment(visibleTimeEnd);
-      let totalSlots = end.diff(start, timeframe);
-
-      // Build out skeleton list
-      for (let i = 0; i < totalSlots; i++) {
-        const slot = moment(start.add(1, timeframe)).startOf(timeframe).format(format);
-        // Attach dates to the objectKeyedByGroup
-        for (var group in objectKeyedByGroup) {
-            objectKeyedByGroup[group][slot] = [];
-        }
-      }
-
-      return objectKeyedByGroup;
-  }
-
   stackItems (items, groups, canvasTimeStart, visibleTimeStart, visibleTimeEnd, width) {
     // if there are no groups return an empty array of dimensions
     if (groups.length === 0) {
@@ -1187,38 +1153,26 @@ export default class ReactCalendarTimeline extends Component {
     return React.Children.map(childArray, child => React.cloneElement(child, childProps));
   }
 
-  getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups, timeframe) {
+  renderShowMoreButtons(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, headerHeight, groups) {
     const ratio = canvasWidth / (canvasTimeEnd - canvasTimeStart);
 
-    showMoreButtons.forEach(button => {
-      // left position
-      const time = moment(button.slot);
-      button.left = Math.round((time.valueOf() - canvasTimeStart) * ratio, -2) + 6;
+    if (showMoreButtons.length) {
+      return showMoreButtons.map(button => {
 
-      // top position
-      let index = groups.findIndex(group => group.id === button.groupId);
-      button.top = headerHeight + this.props.groupHeight * (index + 1) - 18;
-    });
+        const time = moment(button.slot);
+        button.left = Math.round((time.valueOf() - canvasTimeStart) * ratio, -2) + 6;
 
-    return showMoreButtons;
-  }
+        // top position
+        let index = groups.findIndex(group => group.id === button.groupId);
+        button.top = headerHeight + this.props.groupHeight * (index + 1) - 18;
 
-  showMoreButtons(buttons, dimensionItems) {
-    const { timeframe } = this.state;
-
-    if (buttons.length) {
-      return buttons.map(button => {
-            const itemsHidden = dimensionItems.filter(dItem => {
-                if (dItem.dimensions.hide) {
-                  if (moment(button.slot).isBetween(moment(dItem.start_time).startOf(timeframe), moment(dItem.end_time).startOf(timeframe), null, '[]')) {
-                    if (button.items.some(item => item.id === dItem.id)) {
-                      return true;
-                    }
-                  }
-                }
-            });
-            return <ShowMoreButton moreLength={itemsHidden.length ? itemsHidden.length : ''} button={button} key={button.id} onClick={this.handleShowMoreClick.bind(this)}/>;
-        });
+        return <ShowMoreButton
+                key={button.id}
+                moreLength={button.items.length}
+                button={button}
+                onClick={this.handleShowMoreClick}
+                />;
+      });
     } else {
       return null;
     }
@@ -1290,9 +1244,12 @@ export default class ReactCalendarTimeline extends Component {
     }
   }
 
-  handleShowMoreClick(evt, buttonsProps) {
+  handleShowMoreClick = (evt, buttonsProps) => {
     const { left, top, width } = evt.currentTarget.getBoundingClientRect();
-      this.setState({ showMore: buttonsProps, showMorePosition: { top, left, diffLeft: 0, diffTop: 0, width } });
+    this.setState({
+      showMore: buttonsProps,
+      showMorePosition: { top, left, diffLeft: 0, diffTop: 0, width }
+    });
   }
 
   render () {
@@ -1314,7 +1271,7 @@ export default class ReactCalendarTimeline extends Component {
     groupedItems = stackResults.groupedItems;
     showMoreButtons = stackResults.showMoreButtons;
 
-    showMoreButtons = this.getShowMoreButtonsDimensions(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, timeSteps, headerHeight, groups, timeframe);
+    showMoreButtons = this.renderShowMoreButtons(showMoreButtons, canvasTimeStart, canvasTimeEnd, canvasWidth, headerHeight, groups, timeframe);
 
     const outerComponentStyle = {
       height: `${height}px`
@@ -1360,7 +1317,7 @@ export default class ReactCalendarTimeline extends Component {
                 ? this.cursorLine(cursorTime, canvasTimeStart, zoom, canvasTimeEnd, canvasWidth, minUnit, height, headerHeight)
                 : null}
               {this.infoLabel()}
-              {this.showMoreButtons(showMoreButtons, dimensionItems)}
+              {showMoreButtons}
               {this.header(
                 canvasTimeStart,
                 zoom,
