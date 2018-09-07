@@ -1,23 +1,16 @@
-import PropTypes from 'prop-types'
-import React, { Component } from 'react'
-import shouldPureComponentUpdate from 'react-pure-render/function'
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 
-export default class InfoLabel extends Component {
-  static propTypes = {
-    label: PropTypes.string.isRequired
-  }
+export default class InfoLabel extends PureComponent {
+    static propTypes = {
+        label: PropTypes.string.isRequired
+    };
 
-  static defaultProps = {
-    label: ''
-  }
+    static defaultProps = {
+        label: ''
+    };
 
-  shouldComponentUpdate = shouldPureComponentUpdate;
-
-  render () {
-    return (
-      <div className='rct-infolabel'>
-        {this.props.label}
-      </div>
-    )
-  }
+    render() {
+        return <div className="rct-infolabel">{this.props.label}</div>;
+    }
 }
