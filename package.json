@@ -1,7 +1,7 @@
 {
-  "name": "react-calendar-timeline",
+  "name": "@trackvia/react-calendar-timeline",
   "version": "0.15.0",
-  "description": "react calendar timeline",
+  "description": "Legacy, customized fork of react calendar timeline",
   "main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
@@ -20,10 +20,10 @@
     "lib",
     "src"
   ],
-  "homepage": "https://github.com/namespace-ee/react-calendar-timeline",
+  "homepage": "https://github.com/XVia/react-calendar-timeline",
   "repository": {
     "type": "git",
-    "url": "https://github.com/namespace-ee/react-calendar-timeline.git"
+    "url": "https://github.com/XVia/react-calendar-timeline.git"
   },
   "author": "Marius Andra <marius.andra@gmail.com>",
   "contributors": [
