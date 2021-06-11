@@ -405,6 +405,8 @@ export default class ReactCalendarTimeline extends Component {
     } else {
       this.setState({ headerPosition: 'fixed', scrollOffset });
     }
+
+    this.calcTopOffset();
   }
 
   touchStart = (e) => {
@@ -480,8 +482,9 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   resize = (props = this.props) => {
+      this.calcTopOffset();
       if (this.refs.container) {
-          const { width: containerWidth, top: containerTop } = this.refs.container.getBoundingClientRect();
+          const { width: containerWidth } = this.refs.container.getBoundingClientRect();
           let width = containerWidth - props.sidebarWidth - props.rightSidebarWidth;
 
           const {
@@ -490,7 +493,6 @@ export default class ReactCalendarTimeline extends Component {
 
           this.setState({
             width: width,
-            topOffset: containerTop + window.pageYOffset,
             dimensionItems: dimensionItems,
             height: height,
             groupHeights: groupHeights,
@@ -499,6 +501,16 @@ export default class ReactCalendarTimeline extends Component {
           });
           this.refs.scrollComponent.scrollLeft = width;
       }
+  }
+
+  calcTopOffset = () => {
+    if (this.refs.container) {
+      const { top: containerTop } = this.refs.container.getBoundingClientRect();
+
+      this.setState({
+        topOffset: containerTop + window.pageYOffset,
+      });
+    }
   }
 
   onScroll = () => {
@@ -528,6 +540,8 @@ export default class ReactCalendarTimeline extends Component {
     if (this.state.visibleTimeStart !== visibleTimeStart || this.state.visibleTimeEnd !== visibleTimeStart + zoom) {
       this.props.onTimeChange(visibleTimeStart, visibleTimeStart + zoom, this.updateScrollCanvas);
     }
+
+    this.calcTopOffset();
   }
 
   componentWillReceiveProps (nextProps) {
@@ -743,6 +757,8 @@ export default class ReactCalendarTimeline extends Component {
     const { headerLabelGroupHeight, headerLabelHeight } = this.props;
     const headerHeight = headerLabelGroupHeight + headerLabelHeight;
 
+    this.calcTopOffset();
+
     if (pageY - topOffset > headerHeight && e.button === 0) {
       this.setState({isDragging: true, dragStartPosition: e.pageX, dragLastPosition: e.pageX});
     }
@@ -752,6 +768,10 @@ export default class ReactCalendarTimeline extends Component {
     if (this.state.isDragging && !this.state.draggingItem && !this.state.resizingItem) {
       this.refs.scrollComponent.scrollLeft += this.state.dragLastPosition - e.pageX;
       this.setState({dragLastPosition: e.pageX});
+    }
+
+    if (this.state.isDragging) {
+      this.calcTopOffset();
     }
   }
 
