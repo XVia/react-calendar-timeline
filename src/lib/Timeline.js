@@ -72,6 +72,32 @@ export const defaultSubHeaderLabelFormats = {
   minuteLong: 'HH:mm'
 };
 
+const padding = 10;
+
+function getConstrainedTop({
+  height,
+  top,
+}) {
+  const heightWithoutPadding = window.innerHeight - padding;
+  if (top + height > heightWithoutPadding) {
+    return Math.max(padding, heightWithoutPadding - height);
+  }
+
+  return top;
+}
+
+function getConstrainedLeft({
+  width,
+  left,
+}) {
+  const widthWithoutPadding = window.innerWidth - padding;
+  if (left + width > widthWithoutPadding) {
+    return Math.max(padding, widthWithoutPadding - width);
+  }
+
+  return left;
+}
+
 export default class ReactCalendarTimeline extends Component {
   static propTypes = {
     groups: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
@@ -307,6 +333,8 @@ export default class ReactCalendarTimeline extends Component {
       }
     }
 
+    this.showMoreRef = React.createRef();
+
     this.state = {
       width: 1000,
 
@@ -385,6 +413,14 @@ export default class ReactCalendarTimeline extends Component {
     this.refs.scrollComponent.removeEventListener('touchstart', this.touchStart);
     this.refs.scrollComponent.removeEventListener('touchmove', this.touchMove);
     this.refs.scrollComponent.removeEventListener('touchend', this.touchEnd);
+  }
+
+  componentDidUpdate() {
+    if (this.showMoreRef.current) {
+      const boundingRect = this.showMoreRef.current.getBoundingClientRect();
+      this.showMoreRef.current.style.top = getConstrainedTop(boundingRect) + 'px';
+      this.showMoreRef.current.style.left = getConstrainedLeft(boundingRect) + 'px';
+    }
   }
 
   // called on window scroll. it's job is to figure out if we should fix or float the header
@@ -1237,6 +1273,7 @@ export default class ReactCalendarTimeline extends Component {
       return (
           <WatchForClickOut onClickOut={this.onClickOut.bind(this)}>
               <div className="Timeline__showMoreMenu"
+                   ref={this.showMoreRef}
                    style={{
                        zIndex: 110,
                        backgroundColor: 'white',
