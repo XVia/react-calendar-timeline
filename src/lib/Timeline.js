@@ -74,30 +74,6 @@ export const defaultSubHeaderLabelFormats = {
 
 const padding = 10;
 
-function getConstrainedTop({
-  height,
-  top,
-}) {
-  const heightWithoutPadding = window.innerHeight - padding;
-  if (top + height > heightWithoutPadding) {
-    return Math.max(padding, heightWithoutPadding - height);
-  }
-
-  return top;
-}
-
-function getConstrainedLeft({
-  width,
-  left,
-}) {
-  const widthWithoutPadding = window.innerWidth - padding;
-  if (left + width > widthWithoutPadding) {
-    return Math.max(padding, widthWithoutPadding - width);
-  }
-
-  return left;
-}
-
 export default class ReactCalendarTimeline extends Component {
   static propTypes = {
     groups: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
@@ -417,9 +393,28 @@ export default class ReactCalendarTimeline extends Component {
 
   componentDidUpdate() {
     if (this.showMoreRef.current) {
+      let top = parseInt(this.showMoreRef.current.style.top);
+      let left = parseInt(this.showMoreRef.current.style.left);
       const boundingRect = this.showMoreRef.current.getBoundingClientRect();
-      this.showMoreRef.current.style.top = getConstrainedTop(boundingRect) + 'px';
-      this.showMoreRef.current.style.left = getConstrainedLeft(boundingRect) + 'px';
+      const width = boundingRect.width;
+      const height = boundingRect.height;
+
+      const maxHeightWithPadding = window.innerHeight - padding;
+      const maxWidthWithPadding = window.innerWidth - padding;
+
+      const currentMaxX = boundingRect.x + width;
+      const currentMaxY = boundingRect.y + height;
+
+      if (currentMaxX > maxWidthWithPadding) {
+        left -= currentMaxX - maxWidthWithPadding;
+      }
+
+      if (currentMaxY > maxHeightWithPadding) {
+        top -= currentMaxY - maxHeightWithPadding;
+      }
+
+      this.showMoreRef.current.style.top = `${top}px`;
+      this.showMoreRef.current.style.left = `${left}px`;
     }
   }
 
@@ -1302,10 +1297,22 @@ export default class ReactCalendarTimeline extends Component {
   }
 
   handleShowMoreClick = (evt, buttonsProps) => {
-    const { left, top, width } = evt.currentTarget.getBoundingClientRect();
+    const parent = evt.currentTarget.closest('[data-dashboard-panel]');
+    const boundingRect = evt.currentTarget.getBoundingClientRect();
+
+    let left = boundingRect.left;
+    let top = boundingRect.top + boundingRect.height;
+
+    if (parent) {
+      const parentBoundingRect = parent.getBoundingClientRect();
+
+      left -= parentBoundingRect.left;
+      top -= parentBoundingRect.top;
+    }
+
     this.setState({
       showMore: buttonsProps,
-      showMorePosition: { top, left, diffLeft: 0, diffTop: 0, width }
+      showMorePosition: { top, left, diffLeft: 0, diffTop: 0, width: boundingRect.width }
     });
   }
 
